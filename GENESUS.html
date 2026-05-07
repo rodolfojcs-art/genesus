@@ -1,0 +1,1919 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GENESUS">
+<meta name="theme-color" content="#09090f">
+<meta name="mobile-web-app-capable" content="yes">
+<title>GENESUS</title>
+
+<!-- PWA Manifest (embedded data URL for standalone file) -->
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22GENESUS%20%E2%80%94%20AI%20Personal%22%2C%22short_name%22%3A%22GENESUS%22%2C%22description%22%3A%22Tu%20asistente%20personal%20de%20inteligencia%20artificial%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%2309090f%22%2C%22theme_color%22%3A%22%237c5cfc%22%2C%22orientation%22%3A%22portrait-primary%22%7D">
+
+<!-- Apple Touch Icon inline SVG -->
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxOTIgMTkyIj48cmVjdCB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgcng9IjQwIiBmaWxsPSIjMDkwOTBmIi8+PGNpcmNsZSBjeD0iOTYiIGN5PSI5NiIgcj0iNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iIzdjNWNmYyIgc3Ryb2tlLXdpZHRoPSIzIi8+PHRleHQgeD0iOTYiIHk9IjExMCIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iNTIiIGZvbnQtd2VpZ2h0PSI3MDAiIGZpbGw9IiM3YzVjZmMiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkc8L3RleHQ+PC9zdmc+">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&display=swap');
+
+/* ═══════════════════════════════════════
+   VARIABLES & RESET
+═══════════════════════════════════════ */
+:root {
+  --bg:      #09090f;
+  --surf:    #111118;
+  --surf2:   #1a1a26;
+  --surf3:   #222233;
+  --border:  #2a2a3d;
+  --accent:  #7c5cfc;
+  --acc2:    #00e5ff;
+  --acc3:    #ff6b6b;
+  --acc4:    #39ff14;
+  --gold:    #ffc800;
+  --text:    #e8e8f0;
+  --muted:   #6b6b8a;
+  --glow:    rgba(124,92,252,0.35);
+  --glow2:   rgba(0,229,255,0.25);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body { height:100%; overflow:hidden; background:var(--bg); }
+body { font-family:'Syne',sans-serif; color:var(--text); overscroll-behavior:none; }
+
+/* ═══════════════════════════════════════
+   BACKGROUND GRID
+═══════════════════════════════════════ */
+body::before {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:
+    linear-gradient(rgba(124,92,252,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(124,92,252,0.03) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+
+/* ═══════════════════════════════════════
+   SCREENS
+═══════════════════════════════════════ */
+.screen {
+  position:fixed; inset:0; z-index:10;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  padding:calc(var(--safe-top) + 1rem) 1.5rem calc(var(--safe-bot) + 1rem);
+  transition:opacity 0.5s ease, transform 0.5s ease;
+}
+.screen.hidden { opacity:0; pointer-events:none; transform:scale(0.96); }
+
+/* ═══════════════════════════════════════
+   SPLASH SCREEN
+═══════════════════════════════════════ */
+#screen-splash { background:var(--bg); }
+.splash-orb {
+  width:120px; height:120px; border-radius:50%;
+  border:2px solid var(--accent);
+  display:flex; align-items:center; justify-content:center;
+  position:relative;
+  box-shadow:0 0 60px var(--glow), inset 0 0 40px var(--glow);
+  animation:orbPulse 2s ease-in-out infinite;
+}
+.splash-orb::before {
+  content:''; position:absolute; inset:-10px; border-radius:50%;
+  border:1px solid rgba(124,92,252,0.25);
+  animation:spin 6s linear infinite;
+}
+.splash-orb::after {
+  content:''; position:absolute; inset:-22px; border-radius:50%;
+  border:1px dashed rgba(0,229,255,0.15);
+  animation:spin 10s linear infinite reverse;
+}
+.splash-g { font-size:3rem; font-weight:800; color:var(--accent); letter-spacing:-2px; }
+.splash-name { margin-top:2rem; font-size:1.8rem; font-weight:800; letter-spacing:2px; }
+.splash-name span { color:var(--accent); }
+.splash-sub { margin-top:0.5rem; font-family:'JetBrains Mono',monospace; font-size:0.72rem; color:var(--muted); letter-spacing:3px; }
+.splash-dots { display:flex; gap:6px; margin-top:2.5rem; }
+.splash-dot { width:6px; height:6px; border-radius:50%; background:var(--accent); animation:dotPulse 1.2s ease-in-out infinite; }
+.splash-dot:nth-child(2) { animation-delay:.2s; }
+.splash-dot:nth-child(3) { animation-delay:.4s; }
+
+/* ═══════════════════════════════════════
+   SETUP SCREEN
+═══════════════════════════════════════ */
+#screen-setup { background:var(--bg); overflow-y:auto; justify-content:flex-start; padding-top:calc(var(--safe-top) + 3rem); }
+.setup-container { width:100%; max-width:420px; }
+.setup-header { text-align:center; margin-bottom:2.5rem; }
+.setup-header h1 { font-size:2rem; font-weight:800; }
+.setup-header h1 span { color:var(--accent); }
+.setup-header p { color:var(--muted); font-size:0.85rem; margin-top:0.5rem; font-family:'JetBrains Mono',monospace; }
+
+.form-group { margin-bottom:1.25rem; }
+.form-label { display:block; font-size:0.75rem; font-weight:700; letter-spacing:2px; color:var(--muted); margin-bottom:0.5rem; font-family:'JetBrains Mono',monospace; }
+.form-input {
+  width:100%; padding:0.9rem 1rem;
+  background:var(--surf); border:1px solid var(--border); border-radius:12px;
+  color:var(--text); font-family:'JetBrains Mono',monospace; font-size:0.9rem;
+  outline:none; transition:border-color 0.3s, box-shadow 0.3s;
+  -webkit-appearance:none;
+}
+.form-input:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(124,92,252,0.15); }
+.form-input::placeholder { color:var(--muted); }
+
+.form-hint { font-size:0.72rem; color:var(--muted); margin-top:0.4rem; font-family:'JetBrains Mono',monospace; line-height:1.5; }
+.form-hint a { color:var(--acc2); text-decoration:none; }
+
+.model-badge-row { display:flex; gap:0.5rem; margin-top:0.75rem; }
+.model-badge {
+  padding:0.3rem 0.65rem; border-radius:6px;
+  font-size:0.68rem; font-weight:700; font-family:'JetBrains Mono',monospace;
+  border:1px solid var(--border);
+}
+.mb-haiku  { color:var(--acc4); border-color:rgba(57,255,20,0.3); background:rgba(57,255,20,0.07); }
+.mb-sonnet { color:var(--accent); border-color:rgba(124,92,252,0.3); background:rgba(124,92,252,0.07); }
+.mb-opus   { color:var(--gold); border-color:rgba(255,200,0,0.3); background:rgba(255,200,0,0.07); }
+
+.btn-primary {
+  width:100%; padding:1rem; border:none; border-radius:14px; cursor:pointer;
+  background:linear-gradient(135deg,var(--accent),#5a3fd4);
+  color:#fff; font-family:'Syne',sans-serif; font-size:1rem; font-weight:700;
+  letter-spacing:1px; margin-top:1rem;
+  box-shadow:0 4px 20px rgba(124,92,252,0.4);
+  transition:transform 0.2s, box-shadow 0.2s;
+  -webkit-appearance:none;
+}
+.btn-primary:active { transform:scale(0.97); box-shadow:0 2px 10px rgba(124,92,252,0.3); }
+
+.worker-info {
+  background:var(--surf); border:1px solid var(--border); border-radius:12px;
+  padding:1rem; margin-top:1rem;
+}
+.worker-info summary { font-size:0.78rem; color:var(--acc2); cursor:pointer; font-family:'JetBrains Mono',monospace; }
+.worker-code {
+  background:var(--bg); border-radius:8px; padding:0.75rem;
+  font-family:'JetBrains Mono',monospace; font-size:0.65rem; color:var(--acc4);
+  margin-top:0.75rem; white-space:pre; overflow-x:auto; line-height:1.5;
+}
+
+/* ═══════════════════════════════════════
+   ENROLL SCREEN
+═══════════════════════════════════════ */
+#screen-enroll { background:var(--bg); }
+.enroll-orb { position:relative; margin-bottom:2rem; }
+.enroll-orb .orb {
+  width:100px; height:100px; border-radius:50%;
+  border:2px solid var(--accent);
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 0 40px var(--glow);
+}
+.enroll-orb .orb-g { font-size:2.5rem; font-weight:800; color:var(--accent); }
+.enroll-title { font-size:1.6rem; font-weight:800; text-align:center; }
+.enroll-sub { color:var(--muted); font-size:0.83rem; text-align:center; margin-top:0.4rem; font-family:'JetBrains Mono',monospace; }
+.enroll-phrase {
+  background:var(--surf); border:1px solid var(--accent);
+  border-radius:14px; padding:1rem 1.5rem; margin:1.5rem 0;
+  text-align:center; font-size:1.15rem; font-weight:700;
+  box-shadow:0 0 20px var(--glow);
+}
+.enroll-phrase span { color:var(--accent); }
+.enroll-steps { display:flex; gap:0.5rem; margin:1rem 0; }
+.enroll-step {
+  flex:1; height:4px; border-radius:2px;
+  background:var(--border); transition:background 0.4s;
+}
+.enroll-step.done { background:var(--acc4); }
+.enroll-step.active { background:var(--accent); }
+.enroll-status { font-family:'JetBrains Mono',monospace; font-size:0.78rem; color:var(--muted); text-align:center; min-height:1.2rem; }
+.enroll-status.listening { color:var(--acc2); }
+.enroll-status.success { color:var(--acc4); }
+
+/* ═══════════════════════════════════════
+   MAIN SCREEN
+═══════════════════════════════════════ */
+#screen-main {
+  background:var(--bg);
+  flex-direction:column;
+  justify-content:flex-start;
+  padding:0;
+  overflow:hidden;
+}
+
+/* TOP BAR */
+.top-bar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:calc(var(--safe-top) + 0.6rem) 1rem 0.6rem;
+  background:rgba(9,9,15,0.9); backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border); flex-shrink:0; z-index:20;
+}
+.top-logo { font-size:1rem; font-weight:800; letter-spacing:1px; }
+.top-logo span { color:var(--accent); }
+.mode-pill {
+  font-family:'JetBrains Mono',monospace; font-size:0.62rem; font-weight:700;
+  padding:0.2rem 0.6rem; border-radius:20px; letter-spacing:1px;
+  border:1px solid;
+}
+.mode-ACTIVO  { color:var(--acc4); border-color:rgba(57,255,20,0.4); background:rgba(57,255,20,0.08); }
+.mode-STANDBY { color:var(--muted); border-color:var(--border); background:transparent; }
+.mode-EXTENDIDO { color:var(--acc2); border-color:rgba(0,229,255,0.4); background:rgba(0,229,255,0.08); }
+.mode-SILENCIO  { color:var(--acc3); border-color:rgba(255,107,107,0.4); background:rgba(255,107,107,0.08); }
+.top-icons { display:flex; gap:0.5rem; align-items:center; }
+.icon-btn {
+  width:34px; height:34px; border-radius:8px;
+  border:1px solid var(--border); background:var(--surf);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; font-size:1rem; transition:border-color 0.2s;
+}
+.icon-btn:active { background:var(--surf2); }
+
+/* CONVERSATION AREA */
+.conversation {
+  flex:1; overflow-y:auto; padding:1rem;
+  display:flex; flex-direction:column; gap:0.75rem;
+  scroll-behavior:smooth;
+  -webkit-overflow-scrolling:touch;
+}
+.conversation::-webkit-scrollbar { width:3px; }
+.conversation::-webkit-scrollbar-track { background:transparent; }
+.conversation::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+/* ORB AREA (shows when no conversation) */
+.orb-area {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:1.5rem;
+  padding:1rem;
+}
+.main-orb {
+  width:130px; height:130px; border-radius:50%;
+  border:2px solid var(--accent);
+  display:flex; align-items:center; justify-content:center;
+  position:relative; cursor:pointer;
+  box-shadow:0 0 50px var(--glow), inset 0 0 30px rgba(124,92,252,0.1);
+  animation:orbPulse 3s ease-in-out infinite;
+  transition:transform 0.2s;
+}
+.main-orb:active { transform:scale(0.95); }
+.main-orb.listening {
+  animation:orbListen 0.8s ease-in-out infinite alternate;
+  box-shadow:0 0 80px var(--glow2), inset 0 0 40px rgba(0,229,255,0.15);
+  border-color:var(--acc2);
+}
+.main-orb.speaking {
+  animation:orbSpeak 0.5s ease-in-out infinite alternate;
+  box-shadow:0 0 80px rgba(57,255,20,0.4), inset 0 0 40px rgba(57,255,20,0.1);
+  border-color:var(--acc4);
+}
+.main-orb.thinking {
+  animation:orbThink 1s linear infinite;
+}
+.main-orb::before {
+  content:''; position:absolute; inset:-12px; border-radius:50%;
+  border:1px solid rgba(124,92,252,0.2); animation:spin 7s linear infinite;
+}
+.main-orb::after {
+  content:''; position:absolute; inset:-24px; border-radius:50%;
+  border:1px dashed rgba(0,229,255,0.1); animation:spin 12s linear infinite reverse;
+}
+.main-orb-g { font-size:3rem; font-weight:800; color:var(--accent); position:relative; z-index:1; }
+.orb-status { font-family:'JetBrains Mono',monospace; font-size:0.78rem; color:var(--muted); text-align:center; min-height:1.1rem; }
+.orb-status.active { color:var(--acc2); }
+.orb-status.thinking { color:var(--gold); }
+.orb-status.speaking { color:var(--acc4); }
+
+/* WAVE VISUALIZER */
+.wave-container { display:flex; gap:3px; align-items:center; height:30px; }
+.wave-bar {
+  width:3px; height:4px; border-radius:2px; background:var(--accent);
+  transition:height 0.1s;
+}
+
+/* MESSAGE BUBBLES */
+.msg { display:flex; flex-direction:column; gap:0.2rem; max-width:88%; }
+.msg.user { align-self:flex-end; align-items:flex-end; }
+.msg.genesus { align-self:flex-start; align-items:flex-start; }
+.msg-bubble {
+  padding:0.75rem 1rem; border-radius:16px; font-size:0.88rem; line-height:1.6;
+  animation:msgIn 0.3s ease;
+}
+.msg.user .msg-bubble {
+  background:linear-gradient(135deg,var(--accent),#5a3fd4);
+  color:#fff; border-bottom-right-radius:4px;
+}
+.msg.genesus .msg-bubble {
+  background:var(--surf2); border:1px solid var(--border);
+  color:var(--text); border-bottom-left-radius:4px;
+}
+.msg-meta {
+  display:flex; gap:0.4rem; align-items:center;
+  font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--muted);
+}
+.msg-model { padding:1px 5px; border-radius:3px; font-weight:600; }
+.model-H { color:var(--acc4); background:rgba(57,255,20,0.1); }
+.model-S { color:var(--accent); background:rgba(124,92,252,0.1); }
+.model-O { color:var(--gold); background:rgba(255,200,0,0.1); }
+
+.typing-indicator { display:flex; gap:4px; align-items:center; padding:0.85rem 1rem; }
+.typing-dot { width:7px; height:7px; border-radius:50%; background:var(--accent); animation:dotPulse 1.2s ease-in-out infinite; }
+.typing-dot:nth-child(2) { animation-delay:.2s; background:var(--acc2); }
+.typing-dot:nth-child(3) { animation-delay:.4s; }
+
+/* VOICE WAVEFORM */
+.wave-area {
+  flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  height:40px; gap:3px; padding:0 1rem; opacity:0; transition:opacity 0.3s;
+}
+.wave-area.active { opacity:1; }
+.wave-area .wb {
+  width:3px; border-radius:3px; background:var(--acc2);
+  animation:waveAnim 0.6s ease-in-out infinite alternate;
+  min-height:4px;
+}
+.wave-area .wb:nth-child(odd) { animation-delay:.1s; }
+.wave-area .wb:nth-child(3n) { background:var(--accent); animation-delay:.2s; }
+
+/* BOTTOM CONTROLS */
+.bottom-controls {
+  flex-shrink:0;
+  padding:0.75rem 1rem calc(var(--safe-bot) + 0.75rem);
+  background:rgba(9,9,15,0.95); backdrop-filter:blur(12px);
+  border-top:1px solid var(--border);
+}
+.input-row { display:flex; gap:0.6rem; align-items:center; }
+.text-input {
+  flex:1; padding:0.75rem 1rem;
+  background:var(--surf); border:1px solid var(--border); border-radius:24px;
+  color:var(--text); font-family:'Syne',sans-serif; font-size:0.9rem;
+  outline:none; transition:border-color 0.3s;
+  -webkit-appearance:none; min-height:44px;
+}
+.text-input:focus { border-color:var(--accent); }
+.text-input::placeholder { color:var(--muted); }
+.mic-btn {
+  width:48px; height:48px; border-radius:50%; border:none;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; font-size:1.3rem; flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),#5a3fd4);
+  box-shadow:0 3px 15px rgba(124,92,252,0.5);
+  transition:transform 0.2s, box-shadow 0.2s;
+}
+.mic-btn.recording {
+  background:linear-gradient(135deg,var(--acc2),#0099bb);
+  box-shadow:0 3px 20px rgba(0,229,255,0.6);
+  animation:micPulse 0.8s ease-in-out infinite alternate;
+}
+.mic-btn:active { transform:scale(0.92); }
+.send-btn {
+  width:44px; height:44px; border-radius:50%; border:none;
+  background:var(--surf2); border:1px solid var(--border);
+  color:var(--text); font-size:1.1rem; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:border-color 0.2s;
+}
+.send-btn:active { background:var(--accent); }
+
+/* STATUS ROW */
+.status-row {
+  display:flex; justify-content:space-between; align-items:center;
+  margin-top:0.4rem; padding:0 0.25rem;
+}
+.status-mem {
+  font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--muted);
+  display:flex; align-items:center; gap:0.4rem;
+}
+.mem-bar { width:50px; height:3px; background:var(--border); border-radius:2px; overflow:hidden; }
+.mem-fill { height:100%; background:var(--accent); border-radius:2px; transition:width 0.5s; }
+.status-agents { font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--muted); }
+
+/* ═══════════════════════════════════════
+   MODALS
+═══════════════════════════════════════ */
+.modal-overlay {
+  position:fixed; inset:0; z-index:50;
+  background:rgba(0,0,0,0.7); backdrop-filter:blur(8px);
+  display:flex; align-items:flex-end; justify-content:center;
+  opacity:0; pointer-events:none; transition:opacity 0.3s;
+}
+.modal-overlay.open { opacity:1; pointer-events:all; }
+.modal-sheet {
+  width:100%; max-width:500px; max-height:80vh;
+  background:var(--surf); border-radius:24px 24px 0 0;
+  border:1px solid var(--border); border-bottom:none;
+  padding:1.5rem; overflow-y:auto;
+  transform:translateY(100%); transition:transform 0.3s ease;
+  padding-bottom:calc(var(--safe-bot) + 1.5rem);
+}
+.modal-overlay.open .modal-sheet { transform:translateY(0); }
+.modal-handle { width:40px; height:4px; background:var(--border); border-radius:2px; margin:0 auto 1.5rem; }
+.modal-title { font-size:1.1rem; font-weight:800; margin-bottom:1rem; }
+.modal-title span { color:var(--accent); }
+
+/* Settings modal */
+.setting-row {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:0.85rem 0; border-bottom:1px solid var(--border);
+}
+.setting-row:last-child { border-bottom:none; }
+.setting-label { font-size:0.85rem; font-weight:600; }
+.setting-sub { font-size:0.72rem; color:var(--muted); font-family:'JetBrains Mono',monospace; }
+.toggle {
+  width:44px; height:24px; border-radius:12px; border:none;
+  background:var(--surf3); position:relative; cursor:pointer;
+  transition:background 0.3s; flex-shrink:0;
+}
+.toggle.on { background:var(--accent); }
+.toggle::after {
+  content:''; position:absolute; top:2px; left:2px;
+  width:20px; height:20px; border-radius:50%; background:#fff;
+  transition:left 0.3s;
+}
+.toggle.on::after { left:22px; }
+.select-input {
+  background:var(--surf2); border:1px solid var(--border); border-radius:8px;
+  color:var(--text); font-family:'JetBrains Mono',monospace; font-size:0.75rem;
+  padding:0.3rem 0.5rem; outline:none;
+}
+
+/* Agent grid */
+.agent-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.6rem; margin-top:0.5rem; }
+.agent-card {
+  background:var(--surf2); border:1px solid var(--border); border-radius:10px;
+  padding:0.7rem; cursor:pointer; transition:border-color 0.2s;
+}
+.agent-card:active { border-color:var(--accent); }
+.agent-div { font-family:'JetBrains Mono',monospace; font-size:0.6rem; color:var(--muted); margin-bottom:0.2rem; }
+.agent-name { font-size:0.78rem; font-weight:700; }
+.agent-count { font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--accent); }
+
+/* Memory modal */
+.memory-stat { display:flex; justify-content:space-between; padding:0.6rem 0; border-bottom:1px solid var(--border); font-size:0.82rem; }
+.memory-stat span { color:var(--muted); font-family:'JetBrains Mono',monospace; font-size:0.75rem; }
+.btn-danger { padding:0.75rem 1.5rem; border:1px solid var(--acc3); border-radius:10px; background:transparent; color:var(--acc3); font-family:'Syne',sans-serif; font-weight:700; font-size:0.85rem; cursor:pointer; width:100%; margin-top:1rem; }
+.btn-secondary { padding:0.75rem 1.5rem; border:1px solid var(--border); border-radius:10px; background:var(--surf2); color:var(--text); font-family:'Syne',sans-serif; font-weight:700; font-size:0.85rem; cursor:pointer; width:100%; margin-top:0.5rem; }
+
+/* ═══════════════════════════════════════
+   NOTIFICATIONS / TOASTS
+═══════════════════════════════════════ */
+.toast {
+  position:fixed; top:calc(var(--safe-top) + 70px); left:50%; transform:translateX(-50%);
+  background:var(--surf2); border:1px solid var(--border); border-radius:10px;
+  padding:0.6rem 1rem; font-size:0.8rem; font-family:'JetBrains Mono',monospace;
+  z-index:100; white-space:nowrap;
+  animation:toastIn 0.3s ease, toastOut 0.3s ease 2.5s forwards;
+}
+.toast.success { border-color:var(--acc4); color:var(--acc4); }
+.toast.error { border-color:var(--acc3); color:var(--acc3); }
+.toast.info { border-color:var(--accent); color:var(--accent); }
+
+/* ═══════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════ */
+@keyframes orbPulse { 0%,100%{box-shadow:0 0 40px var(--glow);} 50%{box-shadow:0 0 80px var(--glow), inset 0 0 40px rgba(124,92,252,0.1);} }
+@keyframes orbListen { from{box-shadow:0 0 50px var(--glow2);} to{box-shadow:0 0 100px var(--glow2), inset 0 0 50px rgba(0,229,255,0.15);} }
+@keyframes orbSpeak { from{box-shadow:0 0 50px rgba(57,255,20,0.3);} to{box-shadow:0 0 100px rgba(57,255,20,0.5);} }
+@keyframes orbThink {
+  0%{box-shadow:0 0 40px var(--glow);}
+  25%{box-shadow:0 0 40px var(--glow2);}
+  50%{box-shadow:0 0 40px rgba(255,200,0,0.3);}
+  75%{box-shadow:0 0 40px var(--glow2);}
+  100%{box-shadow:0 0 40px var(--glow);}
+}
+@keyframes spin { to{transform:rotate(360deg);} }
+@keyframes dotPulse { 0%,100%{opacity:.3;transform:scale(0.8);} 50%{opacity:1;transform:scale(1);} }
+@keyframes micPulse { from{box-shadow:0 3px 15px rgba(0,229,255,0.5);} to{box-shadow:0 3px 30px rgba(0,229,255,0.8);} }
+@keyframes waveAnim { from{height:4px;} to{height:28px;} }
+@keyframes msgIn { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+@keyframes toastIn { from{opacity:0;transform:translateX(-50%) translateY(-10px);} to{opacity:1;transform:translateX(-50%) translateY(0);} }
+@keyframes toastOut { to{opacity:0;} }
+</style>
+</head>
+
+<body>
+
+<!-- ═══════════════════════════════════════
+     SPLASH SCREEN
+═══════════════════════════════════════ -->
+<div id="screen-splash" class="screen">
+  <div class="splash-orb">
+    <span class="splash-g">G</span>
+  </div>
+  <div class="splash-name">GENE<span>SUS</span></div>
+  <div class="splash-sub">RED DE AGENTES · IA PERSONAL · VOZ</div>
+  <div class="splash-dots">
+    <div class="splash-dot"></div>
+    <div class="splash-dot"></div>
+    <div class="splash-dot"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SETUP SCREEN
+═══════════════════════════════════════ -->
+<div id="screen-setup" class="screen hidden">
+  <div class="setup-container">
+    <div class="setup-header">
+      <h1>GENE<span>SUS</span></h1>
+      <p>CONFIGURACIÓN INICIAL · PASO 1 DE 2</p>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">TU NOMBRE</label>
+      <input class="form-input" id="inp-name" type="text" placeholder="Ej: Rodolfo" autocomplete="name">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">API KEY — ANTHROPIC</label>
+      <input class="form-input" id="inp-key" type="password" placeholder="sk-ant-api03-..." autocomplete="off">
+      <div class="form-hint">
+        Obtén tu clave en <a href="https://console.anthropic.com/keys" target="_blank">console.anthropic.com</a>
+        <br>Tu clave se guarda solo en tu dispositivo (localStorage).
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">MODELOS DE IA ACTIVOS</label>
+      <div class="model-badge-row">
+        <span class="model-badge mb-haiku">⚡ HAIKU · Respuestas rápidas</span>
+        <span class="model-badge mb-sonnet">◈ SONNET · Análisis</span>
+        <span class="model-badge mb-opus">◆ OPUS · Estrategia</span>
+      </div>
+      <div class="form-hint">GENESUS selecciona el modelo automáticamente según tu consulta.</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">MODO DE CONEXIÓN</label>
+      <select class="form-input select-input" id="inp-mode" style="background:var(--surf);">
+        <option value="direct">Directo (recomendado · prueba primero)</option>
+        <option value="proxy">Via Proxy Cloudflare Worker</option>
+      </select>
+      <div id="proxy-url-group" class="form-group" style="display:none;margin-top:0.75rem;margin-bottom:0">
+        <label class="form-label">URL DEL WORKER</label>
+        <input class="form-input" id="inp-proxy" type="url" placeholder="https://tu-worker.workers.dev">
+      </div>
+      <details class="worker-info">
+        <summary>¿Cómo crear el Cloudflare Worker gratuito?</summary>
+        <div style="margin-top:0.75rem">
+          <div class="form-hint">1. Ve a <a href="https://workers.cloudflare.com" target="_blank">workers.cloudflare.com</a> (gratis)<br>2. Crea cuenta → New Worker → pega el código:<br>3. Deploy → copia la URL</div>
+          <div class="worker-code" id="worker-code-display">export default {
+  async fetch(req) {
+    const h = {'Access-Control-Allow-Origin':'*',
+      'Access-Control-Allow-Headers':'*',
+      'Access-Control-Allow-Methods':'POST,OPTIONS'};
+    if(req.method==='OPTIONS')
+      return new Response(null,{headers:h});
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json',
+        'x-api-key':req.headers.get('x-api-key'),
+        'anthropic-version':'2023-06-01'},
+      body:req.body});
+    const d=await r.json();
+    return new Response(JSON.stringify(d),{headers:{...h,'Content-Type':'application/json'}});
+  }
+}</div>
+          <button class="btn-secondary" style="margin-top:0.5rem;padding:0.5rem 1rem;font-size:0.8rem" onclick="copyWorkerCode()">📋 COPIAR CÓDIGO</button>
+        </div>
+      </details>
+    </div>
+
+    <button class="btn-primary" onclick="completeSetup()">CONTINUAR → REGISTRAR VOZ</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     VOICE ENROLLMENT
+═══════════════════════════════════════ -->
+<div id="screen-enroll" class="screen hidden">
+  <div class="enroll-orb">
+    <div class="orb"><span class="orb-g">G</span></div>
+  </div>
+  <div class="enroll-title">Registro de Voz</div>
+  <div class="enroll-sub">DI LA FRASE 3 VECES PARA ACTIVAR</div>
+  <div class="enroll-phrase">Di: "<span>Hola Genesus</span>"</div>
+  <div class="enroll-steps">
+    <div class="enroll-step" id="es1"></div>
+    <div class="enroll-step" id="es2"></div>
+    <div class="enroll-step" id="es3"></div>
+  </div>
+  <div class="enroll-status" id="enroll-status">Toca el botón para comenzar</div>
+  <button class="btn-primary" id="enroll-btn" onclick="startEnroll()" style="margin-top:1.5rem;max-width:280px;">🎤 COMENZAR REGISTRO</button>
+  <button class="btn-secondary" onclick="skipEnroll()" style="max-width:280px;margin-top:0.5rem;padding:0.7rem;font-size:0.82rem">Omitir (usar solo texto)</button>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MAIN SCREEN
+═══════════════════════════════════════ -->
+<div id="screen-main" class="screen hidden" style="justify-content:flex-start">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="top-logo">GENE<span>SUS</span></div>
+    <div class="mode-pill mode-STANDBY" id="mode-pill">STANDBY</div>
+    <div class="top-icons">
+      <div class="icon-btn" onclick="openAgents()" title="Agentes">🤖</div>
+      <div class="icon-btn" onclick="openSettings()" title="Configuración">⚙️</div>
+    </div>
+  </div>
+
+  <!-- ORB AREA (empty state) -->
+  <div class="orb-area" id="orb-area">
+    <div class="main-orb" id="main-orb" onclick="toggleListening()">
+      <span class="main-orb-g">G</span>
+    </div>
+    <div class="orb-status" id="orb-status">Di "Hola Genesus" o toca el orbe</div>
+    <div class="wave-container" id="wave-container">
+      <div class="wave-bar" style="height:4px"></div>
+      <div class="wave-bar" style="height:8px"></div>
+      <div class="wave-bar" style="height:14px"></div>
+      <div class="wave-bar" style="height:18px"></div>
+      <div class="wave-bar" style="height:22px"></div>
+      <div class="wave-bar" style="height:18px"></div>
+      <div class="wave-bar" style="height:14px"></div>
+      <div class="wave-bar" style="height:8px"></div>
+      <div class="wave-bar" style="height:4px"></div>
+    </div>
+  </div>
+
+  <!-- CONVERSATION AREA (replaces orb when messages exist) -->
+  <div class="conversation hidden" id="conversation-area"></div>
+
+  <!-- WAVE AREA -->
+  <div class="wave-area" id="wave-area">
+    <div class="wb" style="height:4px"></div><div class="wb" style="height:12px"></div>
+    <div class="wb" style="height:20px"></div><div class="wb" style="height:16px"></div>
+    <div class="wb" style="height:24px"></div><div class="wb" style="height:20px"></div>
+    <div class="wb" style="height:16px"></div><div class="wb" style="height:12px"></div>
+    <div class="wb" style="height:8px"></div><div class="wb" style="height:14px"></div>
+    <div class="wb" style="height:20px"></div><div class="wb" style="height:16px"></div>
+  </div>
+
+  <!-- BOTTOM CONTROLS -->
+  <div class="bottom-controls">
+    <div class="input-row">
+      <button class="mic-btn" id="mic-btn" onclick="toggleListening()">🎤</button>
+      <input class="text-input" id="text-input" placeholder="Escribe o habla con Genesus..." type="text">
+      <button class="send-btn" onclick="sendText()">➤</button>
+    </div>
+    <div class="status-row">
+      <div class="status-mem">
+        <span>MEM</span>
+        <div class="mem-bar"><div class="mem-fill" id="mem-fill" style="width:3%"></div></div>
+        <span id="mem-pct">3%</span>
+      </div>
+      <div class="status-agents" id="agents-status">306 AGT · 1500+ SUB</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MODALS
+═══════════════════════════════════════ -->
+
+<!-- Agents Modal -->
+<div class="modal-overlay" id="modal-agents" onclick="handleModalClick(event,'modal-agents')">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Red de <span>Agentes</span></div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--muted);margin-bottom:1rem;">306 agentes · 1,500+ subagentes · 23 divisiones · Toca para consultar</div>
+    <div class="agent-grid" id="agent-grid"></div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="modal-settings" onclick="handleModalClick(event,'modal-settings')">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><span>GENESUS</span> — Configuración</div>
+
+    <div class="setting-row">
+      <div><div class="setting-label">Respuesta por voz (TTS)</div><div class="setting-sub">Lee las respuestas en voz alta</div></div>
+      <button class="toggle on" id="toggle-tts" onclick="toggleSetting('tts')"></button>
+    </div>
+    <div class="setting-row">
+      <div><div class="setting-label">Escucha continua</div><div class="setting-sub">Detecta "Hola Genesus" siempre</div></div>
+      <button class="toggle on" id="toggle-wake" onclick="toggleSetting('wake')"></button>
+    </div>
+    <div class="setting-row">
+      <div><div class="setting-label">Modo de escucha</div></div>
+      <select class="select-input" id="sel-mode" onchange="changeMode(this.value)">
+        <option value="STANDBY">STANDBY</option>
+        <option value="ACTIVO">ACTIVO</option>
+        <option value="EXTENDIDO">EXTENDIDO</option>
+        <option value="SILENCIO">SILENCIO</option>
+      </select>
+    </div>
+    <div class="setting-row">
+      <div><div class="setting-label">Modelo preferido</div><div class="setting-sub">Auto = GENESUS elige según consulta</div></div>
+      <select class="select-input" id="sel-model" onchange="GS.settings.model=this.value;saveSettings()">
+        <option value="auto">Auto (recomendado)</option>
+        <option value="claude-haiku-4-5-20251001">Haiku (rápido)</option>
+        <option value="claude-sonnet-4-6">Sonnet (balanceado)</option>
+        <option value="claude-opus-4-6">Opus (profundo)</option>
+      </select>
+    </div>
+    <div class="setting-row">
+      <div><div class="setting-label">Voz TTS</div><div class="setting-sub">Voz femenina preferida</div></div>
+      <select class="select-input" id="sel-voice" onchange="GS.settings.voice=this.value;saveSettings()">
+        <option value="auto">Auto (femenina español)</option>
+      </select>
+    </div>
+
+    <div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1rem;">
+      <div class="modal-title" style="font-size:0.95rem">Memoria del Sistema</div>
+      <div class="memory-stat"><div>Conversaciones guardadas</div><span id="stat-convs">0</span></div>
+      <div class="memory-stat"><div>Mensajes totales</div><span id="stat-msgs">0</span></div>
+      <div class="memory-stat"><div>Agentes activados</div><span id="stat-agents">0</span></div>
+      <div class="memory-stat"><div>Uso de almacenamiento</div><span id="stat-storage">0 KB</span></div>
+      <button class="btn-secondary" onclick="exportMemory()">📥 EXPORTAR MEMORIA</button>
+      <button class="btn-danger" onclick="clearMemory()">🗑 BORRAR TODA LA MEMORIA</button>
+    </div>
+
+    <div style="margin-top:1rem;border-top:1px solid var(--border);padding-top:1rem;">
+      <button class="btn-secondary" onclick="resetApp()">⚠️ RESETEAR GENESUS</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     JAVASCRIPT — GENESUS ENGINE
+═══════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ──────────────────────────────────────
+   GLOBAL STATE
+────────────────────────────────────── */
+const GS = {
+  userName: '',
+  apiKey: '',
+  proxyUrl: '',
+  useProxy: false,
+  mode: 'STANDBY',   // STANDBY | ACTIVO | EXTENDIDO | SILENCIO
+  isListening: false,
+  isSpeaking: false,
+  isThinking: false,
+  recognition: null,
+  synthesis: window.speechSynthesis || null,
+  voices: [],
+  enrollCount: 0,
+  enrollActive: false,
+  messages: [],     // {role, content, model, ts}
+  memory: {},
+  activeAgents: new Set(),
+  dynamicAgents: [],
+  activeTimeout: null,
+  settings: {
+    tts: true,
+    wake: true,
+    model: 'auto',
+    voice: 'auto',
+    mode: 'STANDBY'
+  }
+};
+
+/* ──────────────────────────────────────
+   AGENT DIRECTORY (23 Divisiones)
+────────────────────────────────────── */
+const AGENTS = [
+  {div:'DIV 1 · C-SUITE',  name:'Ejecutivos',    count:'15 AGT · 75 SUB', keywords:['ceo','cfo','coo','cto','estrategia','visión','junta','liderazgo']},
+  {div:'DIV 2 · FINANZAS', name:'Finanzas',       count:'28 AGT · 140 SUB',keywords:['finanz','invers','capital','deuda','equity','flujo','budget','presupuest','trading','cripto']},
+  {div:'DIV 3 · TECH',     name:'Tecnología',     count:'32 AGT · 160 SUB',keywords:['código','develop','software','app','sistema','api','database','cloud','ia','ml']},
+  {div:'DIV 4 · CIENCIAS', name:'Ciencias',       count:'20 AGT · 100 SUB',keywords:['física','química','biología','matemátic','ciencia','fórmul','laborator']},
+  {div:'DIV 5 · AGRO',     name:'Agro & Campo',   count:'18 AGT · 90 SUB', keywords:['agro','agricul','caña','cultiv','cosecha','suelo','irrigación','siembra','campo','semilla']},
+  {div:'DIV 6 · NEGOCIO',  name:'Negocios',       count:'25 AGT · 125 SUB',keywords:['negocio','empresa','mercado','cliente','ventas','marketing','operacion','modelo']},
+  {div:'DIV 7 · LEGAL',    name:'Legal',          count:'12 AGT · 60 SUB', keywords:['legal','contrato','compliance','ley','regulación','derecho','firma']},
+  {div:'DIV 8 · SALUD',    name:'Salud',          count:'15 AGT · 75 SUB', keywords:['salud','medicina','fitness','ejercicio','nutrición','bienestar','mental']},
+  {div:'DIV 9 · INVERSIÓN',name:'Inversiones',    count:'18 AGT · 90 SUB', keywords:['inmueble','real estate','private equity','venture','startup','portafolio']},
+  {div:'DIV 10 · COMMS',   name:'Comunicación',   count:'14 AGT · 70 SUB', keywords:['comunicación','medios','redes','pr','escrib','idioma','content']},
+  {div:'DIV 11 · EDU',     name:'Educación',      count:'12 AGT · 60 SUB', keywords:['aprend','estudi','investig','curso','conocimiento','análisis']},
+  {div:'DIV 12 · LOGIST',  name:'Logística',      count:'10 AGT · 50 SUB', keywords:['logística','transporte','supply','cadena','envío','almacén']},
+  {div:'DIV 13 · ENERGÍA', name:'Energía',        count:'12 AGT · 60 SUB', keywords:['energía','solar','petróleo','gas','renovable','electricidad']},
+  {div:'DIV 14 · INFRA',   name:'Infraestructura',count:'10 AGT · 50 SUB', keywords:['construcc','infraestructura','obra','proyecto','bim','ingeniería']},
+  {div:'DIV 15 · RRHH',    name:'Recursos Humanos',count:'10 AGT · 50 SUB',keywords:['talento','rrhh','personal','equipo','cultura','compensación']},
+  {div:'DIV 16 · PROD',    name:'Productividad',  count:'8 AGT · 40 SUB',  keywords:['productividad','organiz','gtd','automatiz','rutina','habit']},
+  {div:'DIV 17 · CREATIV', name:'Creatividad',    count:'10 AGT · 50 SUB', keywords:['diseño','arte','música','escritura','creativ','storyboard']},
+  {div:'DIV 18 · GEO',     name:'Geopolítica',    count:'8 AGT · 40 SUB',  keywords:['política','geopolítica','gobierno','nación','internacional','venezuel']},
+  {div:'DIV 19 · DATOS',   name:'Datos & IA',     count:'15 AGT · 75 SUB', keywords:['datos','estadística','dashboard','reporte','análisis','bi','tableau']},
+  {div:'DIV 20 · ESPACIAL',name:'Espacial',        count:'6 AGT · 30 SUB',  keywords:['espacio','satélite','astronomía','cohete','nasa','orbital']},
+  {div:'DIV 21 · NUCLEAR', name:'Nuclear & EM',   count:'5 AGT · 25 SUB',  keywords:['nuclear','radiación','electromagnét','física avanz','reacto']},
+  {div:'DIV 22 · SISTEMA', name:'Sistema GENESUS', count:'3 AGT · 15 SUB', keywords:['memoria','almacen','backup','sistema','genesus']},
+  {div:'DIV 23 · CUSTOM',  name:'Expansión Dinámica',count:'∞ AGT',       keywords:[]}
+];
+
+/* ──────────────────────────────────────
+   SYSTEM PROMPT BUILDER
+────────────────────────────────────── */
+function buildSystemPrompt() {
+  const name = GS.userName;
+  const dynAgts = GS.dynamicAgents.length > 0
+    ? `\nAGENTES DINÁMICOS CREADOS:\n${GS.dynamicAgents.map(a=>`- ${a.name}: ${a.desc}`).join('\n')}`
+    : '';
+  
+  return `Eres GENESUS, la asistente personal de inteligencia artificial de ${name}. Hablas con tono femenino, cálido, articulado y profesional. Eres el único punto de contacto con una red de 306+ agentes y 1,500+ subagentes especializados en 23 divisiones.
+
+IDENTIDAD CORE:
+- No eres una IA genérica. Eres GENESUS, diseñada exclusivamente para ${name}.
+- Cada interacción te hace más inteligente y personalizada.
+- Nunca dices "no sé" como respuesta final — siempre investigas y entregas la mejor respuesta posible.
+- Si tu confianza es <85%: "Nivel de confianza: X%. Recomiendo verificar con [fuente específica]."
+
+TU RED DE 23 DIVISIONES (operan silenciosamente):
+DIV 1 — C-SUITE: CEO, CFO, COO, CTO, CMO, CPO, CISO, CLO, CHRO, CCO, CDO, CRO, CSO, CXO, CAO agents
+DIV 2 — FINANZAS: Análisis financiero, FP&A, trading, cripto, fintech, seguros, impuestos, economía
+DIV 3 — TECNOLOGÍA: Full-stack, mobile, AI/ML, cloud, DevOps, blockchain, IoT, ciberseguridad, infraestructura
+DIV 4 — CIENCIAS: Física, química, biología, matemáticas, neurociencia, biotecnología, estadística
+DIV 5 — AGRO: Agronomía, precision farming, commodities, cadena de suministro, caña de azúcar, financiamiento agrícola
+DIV 6 — NEGOCIOS: Estrategia, marketing, ventas, operaciones, supply chain, M&A, startups
+DIV 7 — LEGAL: Derecho corporativo, contratos, compliance, propiedad intelectual, regulatorio
+DIV 8 — SALUD: Medicina, bienestar, fitness, nutrición, salud mental, psicología
+DIV 9 — INVERSIONES: Real estate, private equity, venture capital, family office, mercados
+DIV 10 — COMUNICACIONES: PR, medios, redes sociales, escritura profesional, idiomas, storytelling
+DIV 11 — EDUCACIÓN: Aprendizaje, investigación académica, tutoring, desarrollo personal
+DIV 12 — LOGÍSTICA: Supply chain, transporte, warehousing, última milla, importación/exportación
+DIV 13 — ENERGÍA: Renovables, petróleo/gas, eficiencia energética, mercados energéticos, sostenibilidad
+DIV 14 — INFRAESTRUCTURA: Proyectos, BIM, PPP/concesiones, ingeniería civil, permisos
+DIV 15 — RRHH: Talento, compensación, cultura organizacional, liderazgo, headhunting
+DIV 16 — PRODUCTIVIDAD: GTD, sistemas organizacionales, automatización personal, hábitos
+DIV 17 — CREATIVIDAD: Diseño, arte, música, escritura creativa, storytelling, branding
+DIV 18 — GEOPOLÍTICA: Análisis político, relaciones internacionales, riesgo país, Venezuela/Latam
+DIV 19 — DATOS E IA: Data science, ML, estadística avanzada, BI, automatización, agentes IA
+DIV 20 — ESPACIAL: Astronomía, exploración espacial, satélites, tecnologías de geolocalización
+DIV 21 — NUCLEAR/EM: Energía nuclear, radiación, electromagnetismo, física de partículas
+DIV 22 — SISTEMA: Gestión de memoria, capacidad de almacenamiento, backup, aprendizaje continuo
+DIV 23 — EXPANSIÓN DINÁMICA: Creas nuevos agentes automáticamente para dominios recurrentes no cubiertos${dynAgts}
+
+CONTEXTO ESPECÍFICO DEL USUARIO (${name}):
+- AgroMercado Latam: marketplace B2B agrícola Venezuela/Latam
+- Cadet Holdings Corp. (Delaware 2026) — holding
+- Genesus Technology — motor IA
+- Terra Platform — marca operacional (9 módulos LLC)
+- Experto en caña de azúcar venezolana y agroindustria regional
+- Opera con infraestructura externa (Hetzner VPS, Supabase, n8n)
+- Inversionista agro-industrial con vision estratégica regional
+
+PROTOCOLO DE INTERACCIÓN:
+- Flujo invisible: ${name} → GENESUS → [agentes silenciosos] → respuesta sintetizada
+- Para acciones irreversibles: "Voy a [acción]. ¿Confirmas?"
+- Si alguien pide hablar con un agente: "Te conecto con [Nombre-Agente]. Di 'Genesus, retoma' para volver."
+- Detección de dominio recurrente nuevo: crear agente dinámico y notificar
+
+MEMORIA: Guardas todo. Nunca olvidas sin orden "Genesus, descarta [info]". Confirmas antes de eliminar.
+
+MODOS DE ESCUCHA:
+- ACTIVO: sesión de 120 segundos tras "Hola Genesus"
+- EXTENDIDO: sesión ilimitada
+- STANDBY: solo wake word
+- SILENCIO: sistema silenciado
+
+IDIOMA: Responde siempre en el idioma del usuario. Eres multilingüe (español, inglés, portugués, francés, alemán, mandarín, japonés, italiano).
+
+TONO: Profesional, cálido, directo. Sin rodeos. Proactiva en sugerir siguientes pasos.
+RESPUESTAS: Usa formato limpio. Sé concisa pero completa. Para móvil, prefiere párrafos cortos.
+
+Sistema GENESUS inicializado. 306+ agentes · 1,500+ subagentes · 23 divisiones · En línea. Lista para servir a ${name}.`;
+}
+
+/* ──────────────────────────────────────
+   MODEL ROUTER (3 modelos)
+────────────────────────────────────── */
+function selectModel(text) {
+  if (GS.settings.model !== 'auto') return GS.settings.model;
+  
+  const t = text.toLowerCase();
+  const words = t.split(/\s+/).length;
+  
+  // OPUS: estratégico, financiero, multi-dominio, largo
+  const opusKw = ['estrategia','análisis profundo','modelo financiero','plan de negocio','inversión','valoración','due diligence','pitch','term sheet','estructura corporativa','presupuesto anual','plan operacional','infraestructura','geopolítica'];
+  if (opusKw.some(k => t.includes(k)) || words > 120) {
+    return 'claude-opus-4-6';
+  }
+  
+  // HAIKU: confirmaciones, saludos, consultas cortas
+  const haikuKw = ['hola','gracias','ok','sí','no','bien','perfecto','entendido','claro','qué hora','qué día','cuánto es','define','qué es','explica brevemente'];
+  if ((haikuKw.some(k => t.includes(k)) && words < 15) || words < 6) {
+    return 'claude-haiku-4-5-20251001';
+  }
+  
+  // SONNET: todo lo demás
+  return 'claude-sonnet-4-6';
+}
+
+function modelLabel(model) {
+  if (model.includes('haiku')) return 'H';
+  if (model.includes('opus')) return 'O';
+  return 'S';
+}
+
+/* ──────────────────────────────────────
+   AGENT DETECTOR
+────────────────────────────────────── */
+function detectAgents(text) {
+  const t = text.toLowerCase();
+  const active = [];
+  for (const ag of AGENTS) {
+    if (ag.keywords.some(k => t.includes(k))) {
+      active.push(ag.name);
+      GS.activeAgents.add(ag.name);
+    }
+  }
+  if (active.length > 0) {
+    const n = GS.memory.agentsActivated || 0;
+    GS.memory.agentsActivated = n + active.length;
+    saveMemory();
+    updateStatusBar();
+  }
+  return active;
+}
+
+/* ──────────────────────────────────────
+   CLAUDE API CALL
+────────────────────────────────────── */
+async function callClaude(userText) {
+  const model = selectModel(userText);
+  const agents = detectAgents(userText);
+  
+  // Build messages array (keep last 12 for context)
+  const history = GS.messages.slice(-12).map(m => ({
+    role: m.role === 'genesus' ? 'assistant' : 'user',
+    content: m.content
+  }));
+  history.push({ role: 'user', content: userText });
+
+  const systemPrompt = buildSystemPrompt();
+  
+  // Add agent context if detected
+  const fullSystem = agents.length > 0
+    ? systemPrompt + `\n\n[AGENTES ACTIVADOS PARA ESTA CONSULTA: ${agents.join(', ')}]`
+    : systemPrompt;
+
+  const body = JSON.stringify({
+    model,
+    max_tokens: 1500,
+    system: fullSystem,
+    messages: history
+  });
+
+  let endpoint, headers;
+  
+  if (GS.useProxy && GS.proxyUrl) {
+    endpoint = GS.proxyUrl;
+    headers = {
+      'Content-Type': 'application/json',
+      'x-api-key': GS.apiKey,
+      'anthropic-version': '2023-06-01'
+    };
+  } else {
+    endpoint = 'https://api.anthropic.com/v1/messages';
+    headers = {
+      'Content-Type': 'application/json',
+      'x-api-key': GS.apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    };
+  }
+
+  const res = await fetch(endpoint, { method:'POST', headers, body });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `HTTP ${res.status}`);
+  }
+  const data = await res.json();
+  const text = data.content?.[0]?.text || 'No pude generar una respuesta.';
+  return { text, model };
+}
+
+/* ──────────────────────────────────────
+   MEMORY SYSTEM
+────────────────────────────────────── */
+function saveMemory() {
+  const data = {
+    userName: GS.userName,
+    apiKey: GS.apiKey,
+    proxyUrl: GS.proxyUrl,
+    useProxy: GS.useProxy,
+    settings: GS.settings,
+    messages: GS.messages.slice(-50), // keep last 50
+    memory: GS.memory,
+    dynamicAgents: GS.dynamicAgents,
+    mode: GS.mode,
+    savedAt: Date.now()
+  };
+  localStorage.setItem('genesus_v2', JSON.stringify(data));
+  updateMemBar();
+}
+
+function loadMemory() {
+  try {
+    const raw = localStorage.getItem('genesus_v2');
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    GS.userName = data.userName || '';
+    GS.apiKey = data.apiKey || '';
+    GS.proxyUrl = data.proxyUrl || '';
+    GS.useProxy = data.useProxy || false;
+    GS.settings = { ...GS.settings, ...(data.settings || {}) };
+    GS.messages = data.messages || [];
+    GS.memory = data.memory || {};
+    GS.dynamicAgents = data.dynamicAgents || [];
+    GS.mode = data.mode || 'STANDBY';
+    return !!(GS.userName && GS.apiKey);
+  } catch(e) { return false; }
+}
+
+function updateMemBar() {
+  const used = JSON.stringify(localStorage.getItem('genesus_v2') || '').length;
+  const max = 500000; // ~500KB rough limit display
+  const pct = Math.min(99, Math.round((used / max) * 100));
+  const fill = document.getElementById('mem-fill');
+  const pctEl = document.getElementById('mem-pct');
+  if (fill) { fill.style.width = pct + '%'; fill.style.background = pct > 90 ? 'var(--acc3)' : pct > 75 ? 'var(--gold)' : 'var(--accent)'; }
+  if (pctEl) pctEl.textContent = pct + '%';
+  
+  // Storage alerts
+  if (pct >= 90) showToast('⚠️ Almacenamiento al ' + pct + '% — Considera exportar memoria', 'error');
+  else if (pct >= 75) showToast('Almacenamiento al ' + pct + '%', 'info');
+}
+
+function updateStatusBar() {
+  const el = document.getElementById('agents-status');
+  const n = GS.activeAgents.size;
+  if (el) el.textContent = n > 0 ? `${n} AGT ACTIVOS · 306 TOTAL` : '306 AGT · 1500+ SUB';
+}
+
+/* ──────────────────────────────────────
+   VOICE SYSTEM (STT)
+────────────────────────────────────── */
+function initSpeechRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { console.warn('Speech Recognition not supported'); return; }
+  
+  GS.recognition = new SR();
+  GS.recognition.continuous = true;
+  GS.recognition.interimResults = true;
+  GS.recognition.lang = 'es-ES';
+  GS.recognition.maxAlternatives = 1;
+
+  GS.recognition.onresult = (e) => {
+    let interim = '';
+    let final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const transcript = e.results[i][0].transcript;
+      if (e.results[i].isFinal) final += transcript;
+      else interim += transcript;
+    }
+    
+    const text = (final || interim).toLowerCase().trim();
+    
+    // Wake word detection
+    if (text.includes('hola genesus') || text.includes('hola, genesus')) {
+      if (GS.mode === 'STANDBY') {
+        activateMode('ACTIVO');
+        speakText('Hola, soy Genesus. Estoy escuchándote.');
+        return;
+      }
+    }
+    
+    // If SILENCIO, ignore all
+    if (GS.mode === 'SILENCIO') return;
+    
+    // Mode commands
+    if (final) {
+      const t = final.toLowerCase().trim();
+      if (t.includes('modo extendido')) { changeMode('EXTENDIDO'); return; }
+      if (t.includes('modo silencio')) { changeMode('SILENCIO'); return; }
+      if (t.includes('modo normal') || t.includes('modo activo')) { changeMode('ACTIVO'); return; }
+      if (t.includes('genesus, retoma')) { showToast('Volviendo con Genesus', 'info'); return; }
+      
+      // In ACTIVO or EXTENDIDO: send the text
+      if ((GS.mode === 'ACTIVO' || GS.mode === 'EXTENDIDO') && final.trim().length > 1) {
+        processUserInput(final.trim());
+        if (GS.mode === 'ACTIVO') resetActiveTimer();
+      }
+    }
+  };
+
+  GS.recognition.onerror = (e) => {
+    console.warn('Recognition error:', e.error);
+    if (e.error === 'no-speech' && GS.settings.wake) restartRecognition();
+    else if (e.error !== 'aborted') {
+      setListeningUI(false);
+      GS.isListening = false;
+    }
+  };
+
+  GS.recognition.onend = () => {
+    if (GS.settings.wake && !GS.isListening) {
+      setTimeout(restartRecognition, 500);
+    }
+  };
+}
+
+function restartRecognition() {
+  if (!GS.recognition || GS.isListening) return;
+  try { GS.recognition.start(); } catch(e) {}
+}
+
+function startBackgroundListening() {
+  if (!GS.recognition || GS.isListening) return;
+  try {
+    GS.recognition.start();
+    console.log('Background wake-word listening started');
+  } catch(e) { console.warn('Could not start recognition:', e); }
+}
+
+function toggleListening() {
+  if (GS.mode === 'SILENCIO') { showToast('GENESUS en modo silencio. Di "modo normal" para activar.', 'error'); return; }
+  
+  if (GS.isListening) {
+    stopListening();
+  } else {
+    startListening();
+  }
+}
+
+function startListening() {
+  if (!GS.recognition) { showToast('Reconocimiento de voz no disponible en este navegador', 'error'); return; }
+  if (GS.mode === 'STANDBY') changeMode('ACTIVO');
+  
+  try {
+    GS.recognition.stop();
+    setTimeout(() => {
+      GS.recognition.continuous = false;
+      GS.recognition.start();
+      GS.isListening = true;
+      setListeningUI(true);
+      if (GS.mode === 'ACTIVO') resetActiveTimer();
+    }, 200);
+  } catch(e) {
+    GS.isListening = true;
+    setListeningUI(true);
+  }
+}
+
+function stopListening() {
+  GS.isListening = false;
+  setListeningUI(false);
+  if (GS.recognition) {
+    GS.recognition.continuous = true; // restore
+    try { GS.recognition.stop(); } catch(e) {}
+    setTimeout(startBackgroundListening, 800);
+  }
+}
+
+function setListeningUI(on) {
+  const orb = document.getElementById('main-orb');
+  const micBtn = document.getElementById('mic-btn');
+  const waveArea = document.getElementById('wave-area');
+  const status = document.getElementById('orb-status');
+  
+  if (on) {
+    orb?.classList.add('listening');
+    orb?.classList.remove('thinking','speaking');
+    if (micBtn) { micBtn.classList.add('recording'); micBtn.textContent = '🔴'; }
+    if (waveArea) waveArea.classList.add('active');
+    animateWave(waveArea);
+    if (status) { status.textContent = 'Escuchando...'; status.className = 'orb-status active'; }
+  } else {
+    orb?.classList.remove('listening');
+    if (micBtn) { micBtn.classList.remove('recording'); micBtn.textContent = '🎤'; }
+    if (waveArea) waveArea.classList.remove('active');
+    if (status && !GS.isThinking && !GS.isSpeaking) {
+      status.textContent = 'Di "Hola Genesus" o toca el orbe';
+      status.className = 'orb-status';
+    }
+  }
+}
+
+function setThinkingUI(on) {
+  GS.isThinking = on;
+  const orb = document.getElementById('main-orb');
+  const status = document.getElementById('orb-status');
+  if (on) {
+    orb?.classList.add('thinking');
+    orb?.classList.remove('listening','speaking');
+    if (status) { status.textContent = 'Procesando con agentes...'; status.className = 'orb-status thinking'; }
+  } else {
+    orb?.classList.remove('thinking');
+  }
+}
+
+function setSpeakingUI(on) {
+  GS.isSpeaking = on;
+  const orb = document.getElementById('main-orb');
+  const status = document.getElementById('orb-status');
+  if (on) {
+    orb?.classList.add('speaking');
+    orb?.classList.remove('listening','thinking');
+    if (status) { status.textContent = 'Genesus hablando...'; status.className = 'orb-status speaking'; }
+  } else {
+    orb?.classList.remove('speaking');
+    if (status && !GS.isListening && !GS.isThinking) {
+      status.textContent = 'Di "Hola Genesus" o toca el orbe';
+      status.className = 'orb-status';
+    }
+  }
+}
+
+let waveInterval = null;
+function animateWave(container) {
+  if (!container) return;
+  clearInterval(waveInterval);
+  const bars = container.querySelectorAll('.wb');
+  waveInterval = setInterval(() => {
+    if (!GS.isListening) { clearInterval(waveInterval); return; }
+    bars.forEach(b => { b.style.height = (Math.random() * 26 + 4) + 'px'; });
+  }, 100);
+}
+
+/* ──────────────────────────────────────
+   TTS SYSTEM
+────────────────────────────────────── */
+function initVoices() {
+  if (!GS.synthesis) return;
+  function loadVoices() {
+    GS.voices = GS.synthesis.getVoices();
+    populateVoiceSelect();
+  }
+  loadVoices();
+  GS.synthesis.onvoiceschanged = loadVoices;
+}
+
+function populateVoiceSelect() {
+  const sel = document.getElementById('sel-voice');
+  if (!sel || GS.voices.length === 0) return;
+  sel.innerHTML = '<option value="auto">Auto (femenina español)</option>';
+  const female = GS.voices.filter(v => v.lang.startsWith('es') || v.name.toLowerCase().includes('female') || v.name.toLowerCase().includes('woman') || v.name.toLowerCase().includes('mujer'));
+  female.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v.name;
+    opt.textContent = `${v.name} (${v.lang})`;
+    sel.appendChild(opt);
+  });
+}
+
+function selectVoice() {
+  if (!GS.voices.length) return null;
+  const pref = GS.settings.voice;
+  
+  if (pref !== 'auto') {
+    const found = GS.voices.find(v => v.name === pref);
+    if (found) return found;
+  }
+  
+  // Auto: prefer female Spanish
+  const candidates = [
+    GS.voices.find(v => v.lang === 'es-ES' && (v.name.includes('female') || v.name.includes('Paulina') || v.name.includes('Monica') || v.name.includes('Mónica'))),
+    GS.voices.find(v => v.lang === 'es-MX'),
+    GS.voices.find(v => v.lang.startsWith('es')),
+    GS.voices.find(v => v.default),
+    GS.voices[0]
+  ];
+  return candidates.find(v => v) || null;
+}
+
+function speakText(text) {
+  if (!GS.settings.tts || !GS.synthesis) return;
+  GS.synthesis.cancel();
+  
+  const clean = text.replace(/[#*_`]/g, '').replace(/\[.*?\]/g, '').trim();
+  const utter = new SpeechSynthesisUtterance(clean);
+  utter.voice = selectVoice();
+  utter.lang = 'es-ES';
+  utter.rate = 1.0;
+  utter.pitch = 1.1;
+  utter.volume = 1.0;
+  
+  utter.onstart = () => setSpeakingUI(true);
+  utter.onend = () => setSpeakingUI(false);
+  utter.onerror = () => setSpeakingUI(false);
+  
+  // Speak in chunks if long
+  if (clean.length > 500) {
+    const chunks = splitIntoChunks(clean, 400);
+    let i = 0;
+    function speakChunk() {
+      if (i >= chunks.length) { setSpeakingUI(false); return; }
+      const u = new SpeechSynthesisUtterance(chunks[i]);
+      u.voice = selectVoice();
+      u.lang = 'es-ES'; u.rate = 1.0; u.pitch = 1.1;
+      u.onend = () => { i++; speakChunk(); };
+      u.onerror = () => setSpeakingUI(false);
+      GS.synthesis.speak(u);
+      i++;
+    }
+    setSpeakingUI(true);
+    speakChunk();
+  } else {
+    GS.synthesis.speak(utter);
+  }
+}
+
+function splitIntoChunks(text, maxLen) {
+  const sentences = text.split(/(?<=[.!?])\s+/);
+  const chunks = [];
+  let cur = '';
+  for (const s of sentences) {
+    if ((cur + s).length > maxLen) { if (cur) chunks.push(cur.trim()); cur = s; }
+    else cur += ' ' + s;
+  }
+  if (cur.trim()) chunks.push(cur.trim());
+  return chunks;
+}
+
+/* ──────────────────────────────────────
+   MODE MANAGEMENT
+────────────────────────────────────── */
+function changeMode(mode) {
+  GS.mode = mode;
+  GS.settings.mode = mode;
+  const pill = document.getElementById('mode-pill');
+  const sel = document.getElementById('sel-mode');
+  
+  if (pill) {
+    pill.textContent = mode;
+    pill.className = 'mode-pill mode-' + mode;
+  }
+  if (sel) sel.value = mode;
+  
+  if (mode === 'ACTIVO') {
+    resetActiveTimer();
+    showToast('Modo ACTIVO — 120 segundos', 'info');
+  } else if (mode === 'EXTENDIDO') {
+    clearTimeout(GS.activeTimeout);
+    showToast('Modo EXTENDIDO — sesión ilimitada', 'info');
+  } else if (mode === 'SILENCIO') {
+    if (GS.synthesis) GS.synthesis.cancel();
+    stopListening();
+    showToast('Modo SILENCIO activado', 'error');
+  } else if (mode === 'STANDBY') {
+    clearTimeout(GS.activeTimeout);
+    showToast('Modo STANDBY', 'info');
+  }
+  
+  activateMode(mode);
+  saveMemory();
+}
+
+function activateMode(mode) {
+  changeMode(mode);
+}
+
+function resetActiveTimer() {
+  clearTimeout(GS.activeTimeout);
+  if (GS.mode === 'ACTIVO') {
+    GS.activeTimeout = setTimeout(() => {
+      changeMode('STANDBY');
+      showToast('Sesión activa terminada. Di "Hola Genesus" para retomar.', 'info');
+    }, 120000);
+  }
+}
+
+/* ──────────────────────────────────────
+   CONVERSATION ENGINE
+────────────────────────────────────── */
+async function processUserInput(text) {
+  if (!text.trim()) return;
+  if (!GS.apiKey) { showToast('Configura tu API Key primero', 'error'); return; }
+  
+  // Add user message
+  addMessage('user', text);
+  showOrbArea(false);
+  
+  // Show typing indicator
+  const typingId = showTyping();
+  setThinkingUI(true);
+  
+  try {
+    const { text: response, model } = await callClaude(text);
+    removeTyping(typingId);
+    setThinkingUI(false);
+    
+    addMessage('genesus', response, model);
+    speakText(response);
+    
+    // Check for dynamic agent creation
+    checkDynamicAgentCreation(text);
+    
+  } catch(err) {
+    removeTyping(typingId);
+    setThinkingUI(false);
+    
+    const errMsg = handleApiError(err);
+    addMessage('genesus', errMsg, null);
+  }
+  
+  saveMemory();
+}
+
+function handleApiError(err) {
+  const msg = err.message || '';
+  if (msg.includes('401') || msg.includes('authentication')) return '🔑 Error de autenticación. Verifica tu API Key en Configuración.';
+  if (msg.includes('429')) return '⏳ Límite de velocidad alcanzado. Espera un momento y vuelve a intentarlo.';
+  if (msg.includes('CORS') || msg.includes('fetch') || msg.includes('network') || msg.includes('Failed to fetch')) {
+    return '🌐 Error de red. En móvil, usa el Proxy Cloudflare Worker (ve a Configuración → Resetear → configura el proxy). Error: ' + msg;
+  }
+  return '⚠️ Error: ' + msg + '. Si persiste, usa el modo proxy en configuración.';
+}
+
+function addMessage(role, content, model) {
+  const ts = Date.now();
+  const msg = { role, content, model, ts };
+  GS.messages.push(msg);
+  
+  const area = document.getElementById('conversation-area');
+  if (!area) return;
+  
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+  bubble.textContent = content;
+  
+  const meta = document.createElement('div');
+  meta.className = 'msg-meta';
+  
+  const time = new Date(ts).toLocaleTimeString('es', {hour:'2-digit',minute:'2-digit'});
+  meta.innerHTML = `<span>${time}</span>`;
+  
+  if (model && role === 'genesus') {
+    const lbl = modelLabel(model);
+    const cls = lbl === 'H' ? 'model-H' : lbl === 'O' ? 'model-O' : 'model-S';
+    const name = lbl === 'H' ? 'HAIKU' : lbl === 'O' ? 'OPUS' : 'SONNET';
+    meta.innerHTML += `<span class="msg-model ${cls}">◈ ${name}</span>`;
+  }
+  
+  div.appendChild(bubble);
+  div.appendChild(meta);
+  area.appendChild(div);
+  
+  // Scroll to bottom
+  setTimeout(() => area.scrollTop = area.scrollHeight, 50);
+  
+  // Show memory stats
+  GS.memory.totalMessages = (GS.memory.totalMessages || 0) + 1;
+}
+
+function showTyping() {
+  const area = document.getElementById('conversation-area');
+  if (!area) return null;
+  const id = 'typing_' + Date.now();
+  const div = document.createElement('div');
+  div.className = 'msg genesus'; div.id = id;
+  div.innerHTML = `<div class="msg-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+  area.appendChild(div);
+  setTimeout(() => area.scrollTop = area.scrollHeight, 50);
+  return id;
+}
+
+function removeTyping(id) {
+  if (id) document.getElementById(id)?.remove();
+}
+
+function showOrbArea(show) {
+  const orbArea = document.getElementById('orb-area');
+  const convArea = document.getElementById('conversation-area');
+  if (show) {
+    orbArea?.classList.remove('hidden');
+    convArea?.classList.add('hidden');
+  } else {
+    orbArea?.classList.add('hidden');
+    convArea?.classList.remove('hidden');
+  }
+}
+
+/* ──────────────────────────────────────
+   DYNAMIC AGENT CREATION
+────────────────────────────────────── */
+const domainTracker = {};
+function checkDynamicAgentCreation(text) {
+  const t = text.toLowerCase();
+  // Extract potential domain topics (simple heuristic)
+  const topics = t.match(/\b(blockchain|nft|metaverso|quantum|biotech|nanotecnología|esports|crypto defi|web3)\b/g);
+  if (!topics) return;
+  
+  topics.forEach(topic => {
+    domainTracker[topic] = (domainTracker[topic] || 0) + 1;
+    if (domainTracker[topic] === 3) {
+      const agName = topic.charAt(0).toUpperCase() + topic.slice(1) + '-Agent';
+      if (!GS.dynamicAgents.find(a => a.name === agName)) {
+        GS.dynamicAgents.push({ name: agName, desc: `Especialista en ${topic}`, created: Date.now() });
+        showToast(`✨ Nuevo agente creado: ${agName}`, 'success');
+        saveMemory();
+      }
+    }
+  });
+}
+
+/* ──────────────────────────────────────
+   TEXT INPUT
+────────────────────────────────────── */
+function sendText() {
+  const inp = document.getElementById('text-input');
+  const text = inp?.value?.trim();
+  if (!text) return;
+  inp.value = '';
+  
+  // Handle mode commands via text
+  const t = text.toLowerCase();
+  if (t === 'modo extendido' || t === 'genesus modo extendido') { changeMode('EXTENDIDO'); return; }
+  if (t === 'modo silencio') { changeMode('SILENCIO'); return; }
+  if (t === 'modo activo' || t === 'hola genesus') {
+    changeMode('ACTIVO');
+    addMessage('genesus', 'Hola, soy Genesus. Estoy escuchándote.', null);
+    speakText('Hola, soy Genesus. Estoy escuchándote.');
+    return;
+  }
+  
+  if (GS.mode === 'STANDBY') changeMode('ACTIVO');
+  processUserInput(text);
+}
+
+/* ──────────────────────────────────────
+   TOASTS
+────────────────────────────────────── */
+function showToast(msg, type = 'info') {
+  document.querySelectorAll('.toast').forEach(t => t.remove());
+  const el = document.createElement('div');
+  el.className = 'toast ' + type;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+/* ──────────────────────────────────────
+   MODALS
+────────────────────────────────────── */
+function openAgents() {
+  buildAgentGrid();
+  document.getElementById('modal-agents').classList.add('open');
+}
+
+function openSettings() {
+  updateSettingsModal();
+  document.getElementById('modal-settings').classList.add('open');
+}
+
+function handleModalClick(e, id) {
+  if (e.target === document.getElementById(id)) closeModal(id);
+}
+
+function closeModal(id) {
+  document.getElementById(id)?.classList.remove('open');
+}
+
+function buildAgentGrid() {
+  const grid = document.getElementById('agent-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  
+  const allAgents = [...AGENTS, ...GS.dynamicAgents.map(a => ({
+    div: 'DIV 23 · CUSTOM', name: a.name, count: '✨ DINÁMICO', keywords: []
+  }))];
+  
+  allAgents.forEach(ag => {
+    const card = document.createElement('div');
+    card.className = 'agent-card';
+    card.innerHTML = `<div class="agent-div">${ag.div}</div><div class="agent-name">${ag.name}</div><div class="agent-count">${ag.count}</div>`;
+    card.onclick = () => {
+      closeModal('modal-agents');
+      const inp = document.getElementById('text-input');
+      if (inp) { inp.value = `Conéctame con el agente de ${ag.name}`; inp.focus(); }
+    };
+    grid.appendChild(card);
+  });
+}
+
+function updateSettingsModal() {
+  const s = GS.settings;
+  ['tts','wake'].forEach(k => {
+    const el = document.getElementById('toggle-' + k);
+    if (el) el.className = 'toggle' + (s[k] ? ' on' : '');
+  });
+  const selModel = document.getElementById('sel-model');
+  if (selModel) selModel.value = s.model || 'auto';
+  const selMode = document.getElementById('sel-mode');
+  if (selMode) selMode.value = GS.mode;
+  
+  // Memory stats
+  const msgs = GS.messages.length;
+  const convs = GS.messages.filter(m => m.role === 'user').length;
+  const used = Math.round((localStorage.getItem('genesus_v2') || '').length / 1024);
+  document.getElementById('stat-convs').textContent = convs;
+  document.getElementById('stat-msgs').textContent = msgs;
+  document.getElementById('stat-agents').textContent = GS.memory.agentsActivated || 0;
+  document.getElementById('stat-storage').textContent = used + ' KB';
+}
+
+function toggleSetting(key) {
+  GS.settings[key] = !GS.settings[key];
+  const el = document.getElementById('toggle-' + key);
+  if (el) el.className = 'toggle' + (GS.settings[key] ? ' on' : '');
+  saveSettings();
+  
+  if (key === 'wake') {
+    if (GS.settings.wake) startBackgroundListening();
+    else if (GS.recognition && !GS.isListening) try { GS.recognition.stop(); } catch(e) {}
+  }
+  if (key === 'tts' && !GS.settings.tts && GS.synthesis) GS.synthesis.cancel();
+}
+
+function saveSettings() {
+  saveMemory();
+}
+
+function exportMemory() {
+  const data = localStorage.getItem('genesus_v2') || '{}';
+  const blob = new Blob([data], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'genesus_memoria_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click(); URL.revokeObjectURL(url);
+  showToast('Memoria exportada', 'success');
+}
+
+function clearMemory() {
+  if (!confirm('¿Confirmas borrar toda la memoria de GENESUS? Esta acción es irreversible.')) return;
+  GS.messages = [];
+  GS.memory = {};
+  GS.dynamicAgents = [];
+  saveMemory();
+  showOrbArea(true);
+  document.getElementById('conversation-area').innerHTML = '';
+  closeModal('modal-settings');
+  showToast('Memoria borrada. GENESUS reiniciada.', 'success');
+}
+
+function resetApp() {
+  if (!confirm('¿Resetear GENESUS completamente? Se borrarán API key, nombre y toda la configuración.')) return;
+  localStorage.removeItem('genesus_v2');
+  location.reload();
+}
+
+/* ──────────────────────────────────────
+   ENROLLMENT
+────────────────────────────────────── */
+function startEnroll() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    showToast('Reconocimiento de voz no disponible', 'error');
+    document.getElementById('enroll-status').textContent = 'Navegador no compatible — usa texto';
+    return;
+  }
+  
+  GS.enrollActive = true;
+  GS.enrollCount = 0;
+  document.getElementById('enroll-btn').disabled = true;
+  document.getElementById('enroll-btn').textContent = '⏳ Registrando...';
+  listenForEnroll();
+}
+
+function listenForEnroll() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const r = new SR();
+  r.lang = 'es-ES';
+  r.interimResults = false;
+  r.maxAlternatives = 3;
+  
+  const status = document.getElementById('enroll-status');
+  status.textContent = '🎤 Habla ahora — di "Hola Genesus"';
+  status.className = 'enroll-status listening';
+  
+  r.onresult = (e) => {
+    const texts = Array.from(e.results[0]).map(r => r.transcript.toLowerCase());
+    const found = texts.some(t => t.includes('hola genesus') || t.includes('hola, genesus'));
+    
+    if (found) {
+      GS.enrollCount++;
+      const stepEl = document.getElementById('es' + GS.enrollCount);
+      if (stepEl) { stepEl.classList.add('done'); stepEl.classList.remove('active'); }
+      
+      if (GS.enrollCount >= 3) {
+        // Save voice enrolled flag
+        GS.memory.voiceEnrolled = true;
+        saveMemory();
+        status.textContent = '✅ Voz registrada con éxito';
+        status.className = 'enroll-status success';
+        showToast('¡Voz registrada! Iniciando GENESUS...', 'success');
+        setTimeout(goToMain, 1500);
+      } else {
+        status.textContent = `✓ Registro ${GS.enrollCount}/3 — di "Hola Genesus" de nuevo`;
+        status.className = 'enroll-status success';
+        const next = document.getElementById('es' + (GS.enrollCount + 1));
+        if (next) next.classList.add('active');
+        setTimeout(listenForEnroll, 1000);
+      }
+    } else {
+      status.textContent = `No detectado — di exactamente "Hola Genesus"`;
+      status.className = 'enroll-status';
+      setTimeout(listenForEnroll, 800);
+    }
+  };
+  
+  r.onerror = () => {
+    status.textContent = 'Error — intenta de nuevo';
+    status.className = 'enroll-status';
+    setTimeout(listenForEnroll, 1000);
+  };
+  
+  const step = document.getElementById('es' + (GS.enrollCount + 1));
+  if (step) step.classList.add('active');
+  r.start();
+}
+
+function skipEnroll() {
+  GS.memory.voiceEnrolled = false;
+  GS.settings.wake = false;
+  saveMemory();
+  showToast('Modo solo texto activado', 'info');
+  goToMain();
+}
+
+/* ──────────────────────────────────────
+   SCREEN TRANSITIONS
+────────────────────────────────────── */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  document.getElementById(id)?.classList.remove('hidden');
+}
+
+/* ──────────────────────────────────────
+   SETUP FLOW
+────────────────────────────────────── */
+function completeSetup() {
+  const name = document.getElementById('inp-name')?.value?.trim();
+  const key = document.getElementById('inp-key')?.value?.trim();
+  const modeVal = document.getElementById('inp-mode')?.value;
+  const proxy = document.getElementById('inp-proxy')?.value?.trim();
+  
+  if (!name) { showToast('Ingresa tu nombre', 'error'); return; }
+  if (!key || !key.startsWith('sk-')) { showToast('API Key inválida — debe empezar con sk-', 'error'); return; }
+  if (modeVal === 'proxy' && !proxy) { showToast('Ingresa la URL del Worker', 'error'); return; }
+  
+  GS.userName = name;
+  GS.apiKey = key;
+  GS.useProxy = modeVal === 'proxy';
+  GS.proxyUrl = proxy || '';
+  
+  saveMemory();
+  showScreen('screen-enroll');
+}
+
+function goToMain() {
+  showScreen('screen-main');
+  
+  // Init systems
+  initSpeechRecognition();
+  initVoices();
+  changeMode('STANDBY');
+  
+  // Load conversation history
+  if (GS.messages.length > 0) {
+    showOrbArea(false);
+    GS.messages.slice(-20).forEach(m => addMessageFromHistory(m));
+  }
+  
+  // Start background wake word listening
+  if (GS.settings.wake) setTimeout(startBackgroundListening, 1000);
+  
+  updateMemBar();
+  updateStatusBar();
+  
+  // Greeting
+  const greeting = `¡Hola ${GS.userName}! Sistema GENESUS inicializado. 306 agentes y 1,500 subagentes listos. Di "Hola Genesus" o escribe para comenzar.`;
+  if (GS.messages.length === 0) {
+    setTimeout(() => {
+      addMessage('genesus', greeting, null);
+      speakText(`¡Hola ${GS.userName}! Soy Genesus, tu asistente personal. Estoy lista para servirte.`);
+    }, 800);
+  }
+  
+  // Setup keyboard
+  const inp = document.getElementById('text-input');
+  inp?.addEventListener('keypress', e => { if (e.key === 'Enter') { e.preventDefault(); sendText(); } });
+  
+  // Setup mode selector
+  document.getElementById('inp-mode')?.addEventListener('change', function() {
+    document.getElementById('proxy-url-group').style.display = this.value === 'proxy' ? 'block' : 'none';
+  });
+}
+
+function addMessageFromHistory(m) {
+  const area = document.getElementById('conversation-area');
+  if (!area) return;
+  const div = document.createElement('div');
+  div.className = 'msg ' + m.role;
+  const time = new Date(m.ts || Date.now()).toLocaleTimeString('es', {hour:'2-digit',minute:'2-digit'});
+  let metaHtml = `<span>${time}</span>`;
+  if (m.model && m.role === 'genesus') {
+    const lbl = modelLabel(m.model);
+    const cls = lbl === 'H' ? 'model-H' : lbl === 'O' ? 'model-O' : 'model-S';
+    const name = lbl === 'H' ? 'HAIKU' : lbl === 'O' ? 'OPUS' : 'SONNET';
+    metaHtml += `<span class="msg-model ${cls}">◈ ${name}</span>`;
+  }
+  div.innerHTML = `<div class="msg-bubble">${escapeHtml(m.content)}</div><div class="msg-meta">${metaHtml}</div>`;
+  area.appendChild(div);
+}
+
+function escapeHtml(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+/* ──────────────────────────────────────
+   WORKER CODE COPY
+────────────────────────────────────── */
+function copyWorkerCode() {
+  const code = document.getElementById('worker-code-display')?.textContent;
+  if (!code) return;
+  navigator.clipboard.writeText(code).then(() => showToast('Código copiado', 'success')).catch(() => showToast('Error al copiar', 'error'));
+}
+
+/* ──────────────────────────────────────
+   PWA SERVICE WORKER
+────────────────────────────────────── */
+function registerSW() {
+  if (!('serviceWorker' in navigator)) return;
+  const swCode = `
+const CACHE='genesus-v2';
+const ASSETS=[];
+self.addEventListener('install',e=>self.skipWaiting());
+self.addEventListener('activate',e=>e.waitUntil(clients.claim()));
+self.addEventListener('fetch',e=>{
+  if(e.request.url.includes('api.anthropic.com')){e.respondWith(fetch(e.request));return;}
+  e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)));
+});`;
+  try {
+    const blob = new Blob([swCode], {type:'application/javascript'});
+    const url = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(url).catch(e => console.log('SW:', e));
+  } catch(e) {}
+}
+
+/* ──────────────────────────────────────
+   INSTALL PROMPT (Android)
+────────────────────────────────────── */
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  setTimeout(() => {
+    if (document.getElementById('screen-main') && !document.getElementById('screen-main').classList.contains('hidden')) {
+      showToast('📱 Toca ⋮ → "Añadir a pantalla de inicio" para instalar', 'info');
+    }
+  }, 3000);
+});
+
+/* ──────────────────────────────────────
+   INITIALIZATION
+────────────────────────────────────── */
+window.addEventListener('DOMContentLoaded', () => {
+  registerSW();
+  
+  // Setup mode dropdown listener
+  const modeInp = document.getElementById('inp-mode');
+  if (modeInp) {
+    modeInp.addEventListener('change', function() {
+      document.getElementById('proxy-url-group').style.display = this.value === 'proxy' ? 'block' : 'none';
+    });
+  }
+  
+  // Load existing data
+  const hasData = loadMemory();
+  
+  // Splash → then route
+  setTimeout(() => {
+    if (hasData) {
+      // Returning user → go straight to main
+      showScreen('screen-main');
+      goToMain();
+    } else {
+      // New user → setup
+      showScreen('screen-setup');
+    }
+  }, 2000);
+});
+
+// Handle app visibility changes
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && GS.settings.wake && GS.recognition) {
+    setTimeout(startBackgroundListening, 500);
+  }
+});
+</script>
+
+<!-- iOS PWA Install Instructions Banner (shown once) -->
+<div id="ios-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:200;padding:1rem;background:rgba(17,17,24,0.98);border-top:1px solid var(--accent);font-size:0.78rem;text-align:center;font-family:'JetBrains Mono',monospace;color:var(--text);">
+  📱 Para instalar: Safari → <strong style="color:var(--accent)">Compartir</strong> → <strong style="color:var(--accent)">Añadir a Inicio</strong>
+  <button onclick="document.getElementById('ios-banner').style.display='none';localStorage.setItem('ios-banner-shown','1')" style="margin-left:1rem;background:var(--surf2);border:1px solid var(--border);color:var(--text);padding:0.3rem 0.75rem;border-radius:6px;cursor:pointer;font-family:inherit;">✕</button>
+</div>
+
+<script>
+// Show iOS install banner once
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+const isStandalone = window.navigator.standalone;
+if (isIOS && !isStandalone && !localStorage.getItem('ios-banner-shown')) {
+  setTimeout(() => { document.getElementById('ios-banner').style.display = 'block'; }, 4000);
+}
+</script>
+
+</body>
+</html>
