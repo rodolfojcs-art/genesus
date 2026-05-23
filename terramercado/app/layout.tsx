@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Sora, Fraunces, DM_Mono } from "next/font/google";
 import "./globals.css";
+import { ServiceWorkerRegistration } from "@/components/layout/ServiceWorkerRegistration";
 
 const sora = Sora({
   subsets: ["latin"],
@@ -92,7 +93,10 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${sora.variable} ${fraunces.variable} ${dmMono.variable}`}
     >
-      <body className="min-h-screen antialiased">{children}</body>
+      <body className="min-h-screen antialiased">
+        {children}
+        <ServiceWorkerRegistration />
+      </body>
     </html>
   );
 }
