@@ -1,0 +1,48 @@
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
+
+interface BreadcrumbItem {
+  label: string;
+  href?: string;
+}
+
+interface BreadcrumbsProps {
+  items: BreadcrumbItem[];
+}
+
+export function Breadcrumbs({ items }: BreadcrumbsProps) {
+  return (
+    <nav aria-label="Breadcrumb" className="flex items-center flex-wrap gap-1 text-sm">
+      {items.map((item, index) => {
+        const isLast = index === items.length - 1;
+
+        return (
+          <span key={index} className="flex items-center gap-1">
+            {index > 0 && (
+              <ChevronRight className="h-3.5 w-3.5 text-[#94a3b8] flex-shrink-0" />
+            )}
+            {isLast || !item.href ? (
+              <span
+                className={
+                  isLast
+                    ? "text-[#1e293b] dark:text-[#eff6ff] font-medium truncate max-w-[200px]"
+                    : "text-[#94a3b8]"
+                }
+                aria-current={isLast ? "page" : undefined}
+              >
+                {item.label}
+              </span>
+            ) : (
+              <Link
+                href={item.href}
+                className="text-[#94a3b8] hover:text-[#1e4d8c] dark:hover:text-[#60a5f5] transition-colors"
+              >
+                {item.label}
+              </Link>
+            )}
+          </span>
+        );
+      })}
+    </nav>
+  );
+}

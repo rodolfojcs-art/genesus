@@ -1,0 +1,188 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* Typography */
+  --font-sans: var(--font-sora);
+  --font-mono: var(--font-dm-mono);
+  --font-heading: var(--font-fraunces);
+
+  /* TerraMercado palette mapped to semantic tokens */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* TerraMercado brand colors (direct tokens for use in Tailwind utilities) */
+  --color-terra-blue-900: #0d2240;
+  --color-terra-blue-800: #1a3a6a;
+  --color-terra-blue-700: #1e4d8c;
+  --color-terra-blue-600: #2563b0;
+  --color-terra-blue-500: #3b82d4;
+  --color-terra-blue-400: #60a5f5;
+  --color-terra-blue-300: #93c5fd;
+  --color-terra-blue-100: #dbeafe;
+  --color-terra-blue-50: #eff6ff;
+  --color-terra-gold: #f59e0b;
+  --color-terra-gold-light: #fde68a;
+
+  /* Radius tokens — brand spec */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+  --radius: 12px;
+
+  /* Sidebar */
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+
+  /* Charts */
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+}
+
+/* ── Light mode (default) ────────────────────────────── */
+:root {
+  /* Semantic: light mode uses blue-50 bg, gray-800 text */
+  --background: #eff6ff;
+  --foreground: #1e293b;
+  --card: #ffffff;
+  --card-foreground: #1e293b;
+  --popover: #ffffff;
+  --popover-foreground: #1e293b;
+  --primary: #1e4d8c;
+  --primary-foreground: #ffffff;
+  --secondary: #dbeafe;
+  --secondary-foreground: #1e293b;
+  --muted: #eff6ff;
+  --muted-foreground: #94a3b8;
+  --accent: #dbeafe;
+  --accent-foreground: #0d2240;
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: #dbeafe;
+  --input: #dbeafe;
+  --ring: #60a5f5;
+  --radius: 12px;
+
+  /* Charts */
+  --chart-1: #1e4d8c;
+  --chart-2: #2563b0;
+  --chart-3: #3b82d4;
+  --chart-4: #60a5f5;
+  --chart-5: #93c5fd;
+
+  /* Sidebar */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1e293b;
+  --sidebar-primary: #1e4d8c;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eff6ff;
+  --sidebar-accent-foreground: #0d2240;
+  --sidebar-border: #dbeafe;
+  --sidebar-ring: #60a5f5;
+}
+
+/* ── Dark mode ───────────────────────────────────────── */
+.dark {
+  --background: #0d2240;
+  --foreground: #eff6ff;
+  --card: #1a3a6a;
+  --card-foreground: #eff6ff;
+  --popover: #1a3a6a;
+  --popover-foreground: #eff6ff;
+  --primary: #3b82d4;
+  --primary-foreground: #ffffff;
+  --secondary: #1e4d8c;
+  --secondary-foreground: #dbeafe;
+  --muted: #1a3a6a;
+  --muted-foreground: #93c5fd;
+  --accent: #1e4d8c;
+  --accent-foreground: #dbeafe;
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: rgba(96, 165, 245, 0.2);
+  --input: rgba(96, 165, 245, 0.15);
+  --ring: #60a5f5;
+
+  /* Charts */
+  --chart-1: #60a5f5;
+  --chart-2: #3b82d4;
+  --chart-3: #2563b0;
+  --chart-4: #1e4d8c;
+  --chart-5: #1a3a6a;
+
+  /* Sidebar */
+  --sidebar: #1a3a6a;
+  --sidebar-foreground: #eff6ff;
+  --sidebar-primary: #3b82d4;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1e4d8c;
+  --sidebar-accent-foreground: #dbeafe;
+  --sidebar-border: rgba(96, 165, 245, 0.2);
+  --sidebar-ring: #60a5f5;
+}
+
+/* ── Base layer ──────────────────────────────────────── */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sora), system-ui, sans-serif;
+  }
+  html {
+    @apply font-sans;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  h1, h2, h3 {
+    font-family: var(--font-fraunces), Georgia, serif;
+  }
+  code, kbd, pre, samp {
+    font-family: var(--font-dm-mono), "Courier New", monospace;
+  }
+}
+
+/* ── Utility classes ─────────────────────────────────── */
+@layer utilities {
+  .font-heading {
+    font-family: var(--font-fraunces), Georgia, serif;
+  }
+  .font-mono-terra {
+    font-family: var(--font-dm-mono), "Courier New", monospace;
+  }
+  .terra-score {
+    font-family: var(--font-dm-mono), "Courier New", monospace;
+    color: #f59e0b;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+}
