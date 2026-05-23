@@ -204,7 +204,7 @@ export function TerraLensUpload({ userContext }: TerraLensUploadProps) {
           <Label className="text-xs text-[#475569] dark:text-[#94a3b8]">
             Ciclo productivo
           </Label>
-          <Select value={ciclo} onValueChange={setCiclo}>
+          <Select value={ciclo} onValueChange={(v) => setCiclo(v ?? "")}>
             <SelectTrigger className="bg-white dark:bg-[#1a3a6a] border-[#dbeafe] dark:border-[rgba(96,165,245,0.2)] text-sm">
               <SelectValue placeholder="Seleccionar ciclo" />
             </SelectTrigger>
