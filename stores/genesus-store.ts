@@ -145,6 +145,7 @@ export const useGenesusStore = create<GenesusStore>()(
     }),
     {
       name: 'genesus-store-v3',
+      skipHydration: true,
       partialize: (state) => ({
         userName: state.userName,
         conversations: state.conversations.slice(0, 20),
