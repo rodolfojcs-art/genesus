@@ -313,7 +313,7 @@ export default function ChatConsole() {
             </div>
             <div className="text-center">
               <div className="text-xl font-black text-white mb-1">Hola, {userName}</div>
-              <div className="text-sm text-[var(--muted)]">306+ agentes listos. ¿Qué construimos hoy?</div>
+              <div className="text-sm text-[var(--muted)]">10,011 agentes listos. ¿Qué construimos hoy?</div>
             </div>
             <div className="grid grid-cols-2 gap-2 max-w-md w-full">
               {[

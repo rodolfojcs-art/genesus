@@ -8,7 +8,7 @@ import { clsx } from 'clsx'
 const NAV = [
   { href: '/console', label: 'Consola', icon: '🧠', desc: 'Chat con GENESUS' },
   { href: '/agents', label: 'Agentes', icon: '🤖', desc: 'Red neural' },
-  { href: '/departments', label: 'Divisiones', icon: '🏛️', desc: '23 divisiones' },
+  { href: '/departments', label: 'Divisiones', icon: '🏛️', desc: '20 divisiones' },
   { href: '/factory', label: 'Fábrica', icon: '🏭', desc: 'Control industrial' },
   { href: '/suppliers', label: 'Proveedores', icon: '🔗', desc: 'Red de supply' },
   { href: '/clients', label: 'Clientes', icon: '👥', desc: 'Gestión CRM' },

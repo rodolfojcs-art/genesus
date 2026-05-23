@@ -27,11 +27,16 @@ export default function AgentNetwork() {
   const genesusNode: NodeData = { id: 'genesus', label: 'GENESUS', type: 'genesus', color: '#7c5cfc', x: cx, y: cy }
 
   const supremeNodes: NodeData[] = [
-    { id: 'sup1', label: 'C-SUITE', type: 'supreme', color: '#ffc800', x: cx + 130 * Math.cos(-Math.PI / 2), y: cy + 130 * Math.sin(-Math.PI / 2) },
-    { id: 'sup2', label: 'CIENCIAS', type: 'supreme', color: '#a855f7', x: cx + 130 * Math.cos(-Math.PI / 2 + (2 * Math.PI / 5)), y: cy + 130 * Math.sin(-Math.PI / 2 + (2 * Math.PI / 5)) },
+    { id: 'sup1', label: 'INVERSIONES', type: 'supreme', color: '#39ff14', x: cx + 130 * Math.cos(-Math.PI / 2 + (0 * Math.PI / 5)), y: cy + 130 * Math.sin(-Math.PI / 2 + (0 * Math.PI / 5)) },
+    { id: 'sup2', label: 'RIESGOS', type: 'supreme', color: '#ff0066', x: cx + 130 * Math.cos(-Math.PI / 2 + (2 * Math.PI / 5)), y: cy + 130 * Math.sin(-Math.PI / 2 + (2 * Math.PI / 5)) },
     { id: 'sup3', label: 'TECNOLOGÍA', type: 'supreme', color: '#00e5ff', x: cx + 130 * Math.cos(-Math.PI / 2 + (4 * Math.PI / 5)), y: cy + 130 * Math.sin(-Math.PI / 2 + (4 * Math.PI / 5)) },
-    { id: 'sup4', label: 'FINANZAS', type: 'supreme', color: '#39ff14', x: cx + 130 * Math.cos(-Math.PI / 2 + (6 * Math.PI / 5)), y: cy + 130 * Math.sin(-Math.PI / 2 + (6 * Math.PI / 5)) },
-    { id: 'sup5', label: 'NEGOCIOS', type: 'supreme', color: '#f59e0b', x: cx + 130 * Math.cos(-Math.PI / 2 + (8 * Math.PI / 5)), y: cy + 130 * Math.sin(-Math.PI / 2 + (8 * Math.PI / 5)) },
+    { id: 'sup4', label: 'OPERACIONES', type: 'supreme', color: '#00ffcc', x: cx + 130 * Math.cos(-Math.PI / 2 + (6 * Math.PI / 5)), y: cy + 130 * Math.sin(-Math.PI / 2 + (6 * Math.PI / 5)) },
+    { id: 'sup5', label: 'ESTRATEGIA', type: 'supreme', color: '#ffc800', x: cx + 130 * Math.cos(-Math.PI / 2 + (8 * Math.PI / 5)), y: cy + 130 * Math.sin(-Math.PI / 2 + (8 * Math.PI / 5)) },
+    { id: 'sup6', label: 'CLIENTES', type: 'supreme', color: '#fb923c', x: cx + 130 * Math.cos(-Math.PI / 2 + (10 * Math.PI / 5)), y: cy + 130 * Math.sin(-Math.PI / 2 + (10 * Math.PI / 5)) },
+    { id: 'sup7', label: 'LEGAL', type: 'supreme', color: '#ffaa00', x: cx + 130 * Math.cos(-Math.PI / 2 + (12 * Math.PI / 5)), y: cy + 130 * Math.sin(-Math.PI / 2 + (12 * Math.PI / 5)) },
+    { id: 'sup8', label: 'CAPITAL HUM.', type: 'supreme', color: '#ff6eb4', x: cx + 130 * Math.cos(-Math.PI / 2 + (14 * Math.PI / 5)), y: cy + 130 * Math.sin(-Math.PI / 2 + (14 * Math.PI / 5)) },
+    { id: 'sup9', label: 'ESG', type: 'supreme', color: '#6ee7b7', x: cx + 130 * Math.cos(-Math.PI / 2 + (16 * Math.PI / 5)), y: cy + 130 * Math.sin(-Math.PI / 2 + (16 * Math.PI / 5)) },
+    { id: 'sup10', label: 'EXPANSIÓN', type: 'supreme', color: '#f87171', x: cx + 130 * Math.cos(-Math.PI / 2 + (18 * Math.PI / 5)), y: cy + 130 * Math.sin(-Math.PI / 2 + (18 * Math.PI / 5)) },
   ]
 
   const divisionNodes: NodeData[] = DIVISIONS.map((div, i) => ({
@@ -148,9 +153,10 @@ export default function AgentNetwork() {
           <div className="space-y-2">
             {[
               { label: 'Estado', value: 'ONLINE', color: 'var(--acc4)' },
-              { label: 'Divisiones', value: '23', color: 'var(--accent)' },
-              { label: 'Agentes directores', value: '306+', color: 'var(--acc2)' },
-              { label: 'Sub-agentes', value: '1,500+', color: 'var(--gold)' },
+              { label: 'Divisiones', value: '20', color: 'var(--accent)' },
+              { label: 'Departamentos', value: '1,000', color: 'var(--accent)' },
+              { label: 'Directores', value: '1,000', color: 'var(--acc2)' },
+              { label: 'Sub-agentes', value: '10,000', color: 'var(--gold)' },
               { label: 'Agentes activados hoy', value: metrics.agentsActivated.toString(), color: 'var(--acc4)' },
             ].map(s => (
               <div key={s.label} className="flex justify-between items-center">
@@ -173,7 +179,7 @@ export default function AgentNetwork() {
             )}
             {selected.type === 'genesus' && (
               <div className="text-xs text-[var(--muted)] leading-relaxed mt-2">
-                CEO y Superinteligencia de GENESUS. Orquesta todos los agentes. Usa Claude Opus para análisis estratégico y Claude Sonnet/Haiku para consultas operacionales.
+                CEO y Superinteligencia de GENESUS. Orquesta 10,011 agentes: 10 Directores Supremos, 1,000 Directores de Departamento y 10,000 subagentes especializados. Modelo: Claude Opus 4.
               </div>
             )}
             <button onClick={() => setSelected(null)} className="mt-3 text-[10px] font-mono text-[var(--muted)] hover:text-white transition-colors">

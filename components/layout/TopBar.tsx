@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 const TITLES: Record<string, { title: string; sub: string }> = {
   '/console': { title: 'Consola GENESUS', sub: 'Superinteligencia empresarial en tiempo real' },
   '/agents': { title: 'Red de Agentes', sub: 'Visualización de la arquitectura neural' },
-  '/departments': { title: '23 Divisiones', sub: 'Directorio de departamentos y agentes' },
+  '/departments': { title: '20 Divisiones · 1,000 Departamentos', sub: 'Estructura corporativa estilo BlackRock — 10,011 agentes' },
   '/factory': { title: 'Control de Fábrica', sub: 'Gestión de producción y órdenes' },
   '/suppliers': { title: 'Red de Proveedores', sub: 'Supply chain y búsqueda de suppliers' },
   '/clients': { title: 'CRM de Clientes', sub: 'Gestión de clientes y prospectos' },
