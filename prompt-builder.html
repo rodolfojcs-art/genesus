@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#030812">
+<title>GENESUS — Prompt Builder</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap');
+
+:root {
+  --bg:        #030812;
+  --bg-card:   #0a1628;
+  --bg-panel:  #0d1f3c;
+  --border:    #1a3a6a;
+  --border-hot:#2563b0;
+  --blue900:   #0d2240;
+  --blue800:   #1a3a6a;
+  --blue700:   #1e4d8c;
+  --blue600:   #2563b0;
+  --blue500:   #3b82d4;
+  --blue400:   #60a5f5;
+  --blue300:   #93c5fd;
+  --gold:      #f59e0b;
+  --gold-lt:   #fde68a;
+  --white:     #ffffff;
+  --gray400:   #94a3b8;
+  --gray800:   #1e293b;
+  --red:       #ef4444;
+  --green:     #22c55e;
+  --purple:    #a855f7;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body { min-height:100%; background:var(--bg); color:var(--white); font-family:'Sora',system-ui,sans-serif; }
+
+/* ── HEADER ── */
+.header {
+  background:linear-gradient(135deg,var(--blue900) 0%,var(--bg-card) 100%);
+  border-bottom:1px solid var(--border);
+  padding:24px 40px 20px;
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+}
+.header-left { display:flex; align-items:center; gap:16px; }
+.logo-icon {
+  width:48px; height:48px; border-radius:12px; flex-shrink:0;
+  background:linear-gradient(135deg,var(--gold),var(--blue400));
+  display:flex; align-items:center; justify-content:center;
+  font-size:24px; font-weight:900;
+}
+.logo-title { font-size:20px; font-weight:800; letter-spacing:-0.5px; }
+.logo-sub { font-size:12px; color:var(--gray400); margin-top:2px; }
+.back-btn {
+  padding:8px 18px; border-radius:10px; border:1px solid var(--border);
+  background:var(--bg-panel); color:var(--gray400);
+  font-family:'Sora',sans-serif; font-size:13px; font-weight:600;
+  cursor:pointer; text-decoration:none; display:inline-block;
+  transition:border-color 0.2s, color 0.2s;
+}
+.back-btn:hover { border-color:var(--blue600); color:var(--white); }
+
+/* ── MAIN ── */
+.main { padding:32px 40px; max-width:1100px; margin:0 auto; }
+
+/* ── PIPELINE ── */
+.pipeline {
+  display:grid;
+  grid-template-columns:1fr 40px 1fr 40px 1fr;
+  gap:0; margin-bottom:36px; align-items:center;
+}
+.model-card {
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:16px; padding:20px 24px;
+  transition:all 0.3s ease;
+}
+.model-card.active {
+  background:linear-gradient(135deg,var(--bg-panel),var(--blue900));
+  box-shadow:0 0 30px rgba(96,165,245,0.2);
+}
+.model-card.done { border-color:var(--blue700); }
+.model-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+.model-icon { font-size:22px; }
+.model-phase { font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; }
+.model-name { font-size:14px; font-weight:700; color:var(--white); }
+.model-role { font-size:11px; font-weight:700; letter-spacing:1px; margin-bottom:6px; }
+.model-desc { font-size:12px; color:var(--gray400); line-height:1.5; }
+.model-dot { margin-left:auto; width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.model-dot.done { background:var(--green); }
+.model-dot.pulsing { animation:pulse 1s infinite; }
+.model-preview {
+  margin-top:10px; padding:8px 10px;
+  background:var(--bg-panel); border-radius:8px;
+  font-size:11px; color:var(--gray400);
+  border-left:2px solid currentColor;
+  line-height:1.4; max-height:60px; overflow:hidden;
+  font-family:'DM Mono',monospace;
+}
+.arrow { display:flex; align-items:center; justify-content:center; }
+
+/* ── STATUS BAR ── */
+.status-bar {
+  text-align:center; margin-bottom:24px;
+  padding:14px; background:var(--bg-card);
+  border:1px solid var(--blue700); border-radius:12px;
+  font-size:13px; color:var(--blue300); font-weight:600;
+}
+.error-bar {
+  padding:14px 16px; margin-bottom:24px;
+  background:#1a0a0a; border:1px solid var(--red);
+  border-radius:12px; color:var(--red); font-size:13px;
+}
+
+/* ── CTA ── */
+.cta { text-align:center; margin-bottom:36px; }
+.cta-hint { color:var(--gray400); font-size:14px; margin-bottom:16px; }
+.btn-activate {
+  background:linear-gradient(135deg,var(--blue700),var(--blue500));
+  border:none; border-radius:12px;
+  padding:16px 48px; font-size:15px; font-weight:800;
+  color:var(--white); cursor:pointer; letter-spacing:0.5px;
+  box-shadow:0 4px 20px rgba(37,99,176,0.35);
+  font-family:'Sora',sans-serif;
+  transition:transform 0.15s, box-shadow 0.15s;
+}
+.btn-activate:active { transform:scale(0.97); }
+.btn-activate:disabled { opacity:0.5; cursor:not-allowed; }
+
+/* ── API KEY INPUT ── */
+.key-row {
+  display:flex; gap:12px; align-items:center;
+  max-width:560px; margin:0 auto 24px;
+}
+.key-input {
+  flex:1; padding:11px 14px;
+  background:var(--bg-panel); border:1px solid var(--border);
+  border-radius:10px; color:var(--white);
+  font-family:'DM Mono',monospace; font-size:13px;
+  outline:none; transition:border-color 0.2s;
+}
+.key-input:focus { border-color:var(--blue600); }
+.key-input::placeholder { color:var(--gray400); }
+.key-label {
+  font-size:10px; font-weight:700; letter-spacing:2px;
+  color:var(--gray400); text-align:center; margin-bottom:8px;
+  text-transform:uppercase;
+}
+
+/* ── FINAL OUTPUT ── */
+.output-header {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:16px;
+}
+.output-title {
+  display:flex; align-items:center; gap:12px;
+  font-size:18px; font-weight:800;
+}
+.btn-copy {
+  border:none; border-radius:10px;
+  padding:10px 24px; font-size:13px; font-weight:700;
+  color:#000; cursor:pointer; transition:all 0.2s;
+  font-family:'Sora',sans-serif;
+}
+.output-box {
+  background:var(--bg-panel); border:1px solid var(--blue700);
+  border-radius:16px; padding:28px 32px;
+  font-size:13px; line-height:1.7; color:var(--blue300);
+  white-space:pre-wrap; font-family:'DM Mono',monospace;
+  max-height:600px; overflow-y:auto;
+}
+.output-box::-webkit-scrollbar { width:4px; }
+.output-box::-webkit-scrollbar-thumb { background:var(--blue700); border-radius:2px; }
+
+/* ── INFO CARDS ── */
+.info-grid {
+  display:flex; gap:12px; flex-wrap:wrap; margin-top:20px;
+}
+.info-card {
+  flex:1; min-width:200px;
+  background:var(--bg-card); border:1px solid var(--border);
+  border-radius:12px; padding:14px 18px;
+}
+.info-card-label {
+  font-size:10px; color:var(--gray400); letter-spacing:2px;
+  margin-bottom:6px; font-weight:700; text-transform:uppercase;
+}
+.info-card-text { font-size:13px; color:var(--white); line-height:1.5; }
+
+.attribution {
+  margin-top:16px; padding:12px 18px;
+  background:#0a1a0a; border:1px solid rgba(34,197,94,0.15);
+  border-radius:10px; font-size:12px; color:var(--green);
+}
+
+/* ── ANIMATIONS ── */
+@keyframes pulse {
+  0%,100% { opacity:1; transform:scale(1); }
+  50% { opacity:0.5; transform:scale(1.5); }
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width:768px) {
+  .header { padding:20px 20px 16px; }
+  .main { padding:24px 16px; }
+  .pipeline {
+    grid-template-columns:1fr;
+    grid-template-rows:auto;
+  }
+  .arrow { transform:rotate(90deg); padding:4px 0; }
+  .info-grid { flex-direction:column; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo-icon">G</div>
+    <div>
+      <div class="logo-title">GENESUS — Prompt Builder</div>
+      <div class="logo-sub">3 modelos · 1 prompt maestro · arquitectura completa de IA</div>
+    </div>
+  </div>
+  <a href="index.html" class="back-btn">← Volver a GENESUS</a>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- API KEY (used only for builder calls) -->
+  <div class="key-label">Anthropic API Key</div>
+  <div class="key-row">
+    <input id="api-key" class="key-input" type="password" placeholder="sk-ant-api03-… (se lee de GENESUS si está guardada)">
+  </div>
+
+  <!-- MODEL PIPELINE -->
+  <div class="pipeline" id="pipeline">
+
+    <!-- Opus -->
+    <div class="model-card" id="card-opus">
+      <div class="model-header">
+        <span class="model-icon">⚡</span>
+        <div>
+          <div class="model-phase" style="color:var(--gold)">FASE 1</div>
+          <div class="model-name">Claude Opus 4</div>
+        </div>
+        <div class="model-dot" id="dot-opus"></div>
+      </div>
+      <div class="model-role" style="color:var(--gold)">ARQUITECTO ESTRATÉGICO</div>
+      <div class="model-desc">Diseña la arquitectura de alto nivel, define los 1000 departamentos y la jerarquía de poder de GENESUS</div>
+      <div class="model-preview" style="color:var(--gold);display:none" id="preview-opus"></div>
+    </div>
+
+    <!-- Arrow -->
+    <div class="arrow">
+      <svg width="32" height="16" viewBox="0 0 32 16">
+        <path d="M0 8 H24 M20 4 L28 8 L20 12" stroke="#2563b0" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <!-- Sonnet -->
+    <div class="model-card" id="card-sonnet">
+      <div class="model-header">
+        <span class="model-icon">⚙️</span>
+        <div>
+          <div class="model-phase" style="color:var(--blue400)">FASE 2</div>
+          <div class="model-name">Claude Sonnet 4</div>
+        </div>
+        <div class="model-dot" id="dot-sonnet"></div>
+      </div>
+      <div class="model-role" style="color:var(--blue400)">INGENIERO TÉCNICO</div>
+      <div class="model-desc">Convierte la arquitectura en especificaciones técnicas precisas: stack, schemas, APIs, agentes</div>
+      <div class="model-preview" style="color:var(--blue400);display:none" id="preview-sonnet"></div>
+    </div>
+
+    <!-- Arrow -->
+    <div class="arrow">
+      <svg width="32" height="16" viewBox="0 0 32 16">
+        <path d="M0 8 H24 M20 4 L28 8 L20 12" stroke="#2563b0" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <!-- Haiku -->
+    <div class="model-card" id="card-haiku">
+      <div class="model-header">
+        <span class="model-icon">🎯</span>
+        <div>
+          <div class="model-phase" style="color:var(--blue300)">FASE 3</div>
+          <div class="model-name">Claude Haiku</div>
+        </div>
+        <div class="model-dot" id="dot-haiku"></div>
+      </div>
+      <div class="model-role" style="color:var(--blue300)">SINTETIZADOR FINAL</div>
+      <div class="model-desc">Funde Opus + Sonnet en el prompt definitivo para Claude Code. Ultra-denso, cero ambigüedad</div>
+      <div class="model-preview" style="color:var(--blue300);display:none" id="preview-haiku"></div>
+    </div>
+
+  </div><!-- /pipeline -->
+
+  <!-- STATUS / ERROR -->
+  <div class="status-bar" id="status-bar" style="display:none"></div>
+  <div class="error-bar" id="error-bar" style="display:none"></div>
+
+  <!-- CTA -->
+  <div class="cta" id="cta-area">
+    <div class="cta-hint">Los 3 modelos trabajarán en secuencia. Tiempo estimado: 60–90 segundos.</div>
+    <button class="btn-activate" id="btn-activate" onclick="buildPrompt()">⚡ ACTIVAR GENESUS PROMPT BUILDER</button>
+  </div>
+
+  <!-- FINAL OUTPUT -->
+  <div id="output-area" style="display:none;margin-top:8px">
+    <div class="output-header">
+      <div class="output-title">
+        <div style="width:10px;height:10px;border-radius:50%;background:var(--green)"></div>
+        PROMPT MAESTRO — Listo para Claude Code
+      </div>
+      <button class="btn-copy" id="btn-copy" onclick="copyPrompt()"
+        style="background:linear-gradient(135deg,var(--gold),#d97706)">
+        📋 COPIAR PROMPT
+      </button>
+    </div>
+
+    <div class="output-box" id="output-text"></div>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="info-card-label">Siguiente Paso</div>
+        <div class="info-card-text">Abre <span style="color:var(--gold);font-family:monospace">claude.ai/code</span> y pega el prompt en un nuevo proyecto vacío</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-label">Stack Confirmado</div>
+        <div class="info-card-text">Next.js 14 · Supabase · Claude API · TypeScript · Independiente de TerraMercado</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-label">Agentes</div>
+        <div class="info-card-text">1 GENESUS · 1,000 Directores · 10,000 Sub-agentes · Todos con prompts reales</div>
+      </div>
+    </div>
+
+    <div class="attribution">
+      ✓ Prompt generado por 3 modelos Claude en colaboración secuencial — Opus (Arquitectura) → Sonnet (Ingeniería) → Haiku (Síntesis)
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+'use strict';
+
+const MODELS = {
+  opus:   { id:'claude-opus-4-5',           label:'Opus 4' },
+  sonnet: { id:'claude-sonnet-4-20250514',  label:'Sonnet 4' },
+  haiku:  { id:'claude-haiku-4-5-20251001', label:'Haiku' }
+};
+
+const OPUS_PROMPT = `Eres el Arquitecto Estratégico de GENESUS — la IA empresarial más ambiciosa jamás construida. Tu misión: diseñar la arquitectura conceptual completa de este sistema.
+
+GENESUS es una entidad de inteligencia artificial con estructura corporativa tipo BlackRock que tiene:
+- 1 Agente Principal: GENESUS (CEO/Superinteligencia)
+- 1000 Agentes Directores (cada uno dirige un departamento)
+- 10 Sub-agentes por Director = 10,000 agentes totales
+
+STACK: Next.js 14 + Supabase + Claude API (claude-sonnet-4-20250514)
+OBJETIVO: App independiente, no conectada a TerraMercado. Backend real con Claude API.
+
+Diseña:
+1. La jerarquía de poder completa de GENESUS (estructura corporativa)
+2. Los 1000 departamentos — categoriza en macro-sectores y lista al menos 50 departamentos representativos cubriendo: física nuclear, energías renovables, electromagnetismo, electromecánica, fisión/fusión limpia, química avanzada, matemática pura, IA/ML, manufactura, diseño industrial, biotecnología, nanotecnología, economía, finanzas, geopolítica, derecho, medicina, arquitectura, software, hardware, robótica, astrofísica, oceanografía, climatología, agricultura, minería, petroquímica, logística, marketing, recursos humanos y más
+3. Las capacidades core de GENESUS: diseño de productos, gestión de fábricas, búsqueda de proveedores, gestión de clientes, construcción de proyectos, entrega de productos terminados
+4. El flujo de orquestación: cómo GENESUS recibe un pedido → delega a directores → coordina sub-agentes → entrega resultado
+5. La base de datos conceptual: qué tablas necesita Supabase para sostener 10,000 agentes
+
+Sé visionario pero técnicamente realizable. Responde en español. Máximo 800 palabras.`;
+
+function sonnetPrompt(opusOut) {
+  return `Eres el Ingeniero Técnico de GENESUS. El Arquitecto Estratégico (Claude Opus) ya diseñó la arquitectura conceptual. Tu trabajo: convertirla en especificaciones técnicas de implementación para Claude Code.
+
+ARQUITECTURA CONCEPTUAL (del Arquitecto):
+${opusOut}
+
+STACK CONFIRMADO: Next.js 14 (App Router) + Supabase + Claude API (claude-sonnet-4-20250514) + TypeScript
+
+Genera las especificaciones técnicas completas:
+
+1. ESTRUCTURA DE ARCHIVOS: El árbol de directorios completo del proyecto Next.js
+2. SCHEMA SUPABASE: Las tablas SQL necesarias (agents, departments, conversations, tasks, products, suppliers, clients, factory_orders, etc.)
+3. TIPOS DE AGENTES: Los system prompts base para cada tipo (Director de Departamento, Sub-agente Especialista, GENESUS Orchestrator)
+4. APIS ROUTES: Las rutas de Next.js necesarias (/api/genesus/query, /api/agents/[id]/invoke, /api/departments, /api/factory, etc.)
+5. COMPONENTES UI: Los componentes React principales (GenesusConsole, AgentNetwork, DepartmentView, FactoryControl, SupplierSearch, etc.)
+6. ORQUESTACIÓN: Código pseudocódigo del loop principal de GENESUS para procesar una solicitud compleja
+7. FEATURES CRÍTICAS: Control de fábrica, diseño de productos, gestión de proveedores/clientes, entrega de diseños CAD/documentos
+
+Sé preciso y completo. Cada especificación debe ser implementable directamente. Responde en español. Máximo 900 palabras.`;
+}
+
+function haikuPrompt(opusOut, sonnetOut) {
+  return `Eres el Sintetizador Final. Tienes las salidas de dos modelos superiores. Tu misión: crear el PROMPT DEFINITIVO para Claude Code que construya GENESUS completo.
+
+SALIDA DEL ARQUITECTO (Opus):
+${opusOut.slice(0, 1200)}
+
+SALIDA DEL INGENIERO (Sonnet):
+${sonnetOut.slice(0, 1400)}
+
+Crea ahora el PROMPT MAESTRO para Claude Code. Debe ser:
+- Ultra-específico: sin ambigüedad
+- Completo: todo lo que Claude Code necesita para construir la app de inicio a fin
+- Estructurado: con secciones claras
+- Accionable: comandos, archivos, configuraciones exactas
+
+El prompt debe incluir:
+1. IDENTIDAD Y MISIÓN del proyecto
+2. STACK TÉCNICO exacto con versiones
+3. ARQUITECTURA DE AGENTES completa
+4. SCHEMA DE BASE DE DATOS con SQL real
+5. ESTRUCTURA DE ARCHIVOS completa
+6. SYSTEM PROMPTS de los agentes principales
+7. APIS Y RUTAS a implementar
+8. UI/UX: las pantallas principales
+9. FEATURES a implementar en orden
+10. INSTRUCCIONES FINALES para Claude Code
+
+El prompt debe empezar con: "# GENESUS — SISTEMA DE INTELIGENCIA ARTIFICIAL EMPRESARIAL COMPLETO"
+
+Sé exhaustivo. Este es el prompt más importante que jamás construirás. Responde en español. Mínimo 1200 palabras, sin límite superior.`;
+}
+
+/* ── STATE ── */
+let outputs = { opus:'', sonnet:'', haiku:'' };
+let running = false;
+
+/* ── RESOLVE API KEY ── */
+function resolveApiKey() {
+  const inp = document.getElementById('api-key').value.trim();
+  if (inp) return inp;
+  // Fall back to key saved by the main GENESUS app
+  try {
+    const saved = JSON.parse(localStorage.getItem('genesus_v2') || '{}');
+    return saved.apiKey || '';
+  } catch(e) { return ''; }
+}
+
+/* ── CLAUDE CALL ── */
+async function callClaude(modelId, prompt, apiKey) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: modelId,
+      max_tokens: 2000,
+      messages: [{ role:'user', content:prompt }]
+    })
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.content?.[0]?.text || '';
+}
+
+/* ── UI HELPERS ── */
+function setCardActive(key) {
+  ['opus','sonnet','haiku'].forEach(k => {
+    const card = document.getElementById('card-' + k);
+    const dot  = document.getElementById('dot-' + k);
+    if (k === key) {
+      card.classList.add('active');
+      dot.classList.add('pulsing');
+      dot.style.background = k === 'opus' ? 'var(--gold)' : k === 'sonnet' ? 'var(--blue400)' : 'var(--blue300)';
+    } else {
+      card.classList.remove('active');
+      dot.classList.remove('pulsing');
+    }
+  });
+}
+
+function setCardDone(key, text) {
+  const card = document.getElementById('card-' + key);
+  const dot  = document.getElementById('dot-' + key);
+  const prev = document.getElementById('preview-' + key);
+  card.classList.remove('active');
+  card.classList.add('done');
+  dot.classList.remove('pulsing');
+  dot.classList.add('done');
+  if (prev) {
+    prev.textContent = text.slice(0, 120) + '…';
+    prev.style.display = 'block';
+  }
+}
+
+function showStatus(msg) {
+  const el = document.getElementById('status-bar');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function hideStatus() {
+  document.getElementById('status-bar').style.display = 'none';
+}
+
+function showError(msg) {
+  const el = document.getElementById('error-bar');
+  el.textContent = '⚠️ Error: ' + msg;
+  el.style.display = 'block';
+}
+
+/* ── MAIN BUILD ── */
+async function buildPrompt() {
+  if (running) return;
+
+  const apiKey = resolveApiKey();
+  if (!apiKey || !apiKey.startsWith('sk-')) {
+    showError('Ingresa una API Key válida (debe empezar con sk-).');
+    return;
+  }
+
+  running = true;
+  outputs = { opus:'', sonnet:'', haiku:'' };
+  document.getElementById('error-bar').style.display = 'none';
+  document.getElementById('output-area').style.display = 'none';
+  document.getElementById('btn-activate').disabled = true;
+  ['opus','sonnet','haiku'].forEach(k => {
+    document.getElementById('card-' + k).classList.remove('active','done');
+    document.getElementById('dot-' + k).classList.remove('pulsing','done');
+    document.getElementById('dot-' + k).style.background = '';
+    const prev = document.getElementById('preview-' + k);
+    if (prev) prev.style.display = 'none';
+  });
+
+  try {
+    // Phase 1 — Opus
+    setCardActive('opus');
+    showStatus('⚡ Opus 4 diseñando arquitectura de 1000 departamentos…');
+    outputs.opus = await callClaude(MODELS.opus.id, OPUS_PROMPT, apiKey);
+    setCardDone('opus', outputs.opus);
+
+    // Phase 2 — Sonnet
+    setCardActive('sonnet');
+    showStatus('⚙️ Sonnet 4 generando especificaciones técnicas…');
+    outputs.sonnet = await callClaude(MODELS.sonnet.id, sonnetPrompt(outputs.opus), apiKey);
+    setCardDone('sonnet', outputs.sonnet);
+
+    // Phase 3 — Haiku
+    setCardActive('haiku');
+    showStatus('🎯 Haiku sintetizando el prompt maestro final…');
+    outputs.haiku = await callClaude(MODELS.haiku.id, haikuPrompt(outputs.opus, outputs.sonnet), apiKey);
+    setCardDone('haiku', outputs.haiku);
+
+    // Done
+    ['opus','sonnet','haiku'].forEach(k => document.getElementById('card-' + k).classList.remove('active'));
+    hideStatus();
+
+    document.getElementById('output-text').textContent = outputs.haiku;
+    document.getElementById('output-area').style.display = 'block';
+    document.getElementById('cta-area').style.display = 'none';
+    document.getElementById('output-area').scrollIntoView({ behavior:'smooth' });
+
+  } catch(err) {
+    ['opus','sonnet','haiku'].forEach(k => document.getElementById('card-' + k).classList.remove('active'));
+    hideStatus();
+    showError(err.message);
+    document.getElementById('btn-activate').disabled = false;
+    running = false;
+    return;
+  }
+
+  running = false;
+}
+
+/* ── COPY ── */
+async function copyPrompt() {
+  if (!outputs.haiku) return;
+  try {
+    await navigator.clipboard.writeText(outputs.haiku);
+    const btn = document.getElementById('btn-copy');
+    btn.textContent = '✓ COPIADO';
+    btn.style.background = 'var(--green)';
+    setTimeout(() => {
+      btn.textContent = '📋 COPIAR PROMPT';
+      btn.style.background = 'linear-gradient(135deg,var(--gold),#d97706)';
+    }, 2500);
+  } catch(e) {
+    alert('No se pudo copiar automáticamente. Selecciona el texto manualmente.');
+  }
+}
+
+/* ── INIT: pre-fill key from GENESUS memory ── */
+window.addEventListener('DOMContentLoaded', () => {
+  try {
+    const saved = JSON.parse(localStorage.getItem('genesus_v2') || '{}');
+    if (saved.apiKey) {
+      const inp = document.getElementById('api-key');
+      inp.value = saved.apiKey;
+      inp.placeholder = 'API Key cargada de GENESUS';
+    }
+  } catch(e) {}
+});
+</script>
+</body>
+</html>
