@@ -1,0 +1,6 @@
+{
+  "name": "genesus",
+  "framework": "nextjs",
+  "buildCommand": "next build",
+  "outputDirectory": ".next"
+}
