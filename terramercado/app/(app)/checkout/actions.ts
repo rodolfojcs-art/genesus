@@ -43,7 +43,7 @@ export async function createOrderAction(
     product: ProductRef;
   };
 
-  const rawItems = (cart.cart_items ?? []) as RawCartItem[];
+  const rawItems = (cart.cart_items ?? []) as unknown as RawCartItem[];
 
   if (rawItems.length === 0) {
     return { error: "El carrito está vacío" };
