@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useGenesusStore } from '@/stores/genesus-store'
 import { detectActiveAgents } from '@/lib/agents/genesus'
-import { modelLabel } from '@/lib/anthropic'
+import { modelLabel } from '@/lib/models'
 import type { Message, OrchestrationStep } from '@/types'
 import { clsx } from 'clsx'
 
