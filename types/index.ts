@@ -45,6 +45,7 @@ export interface Message {
   agentsUsed?: string[]
   timestamp: number
   isStreaming?: boolean
+  toolCalls?: ToolCall[]
 }
 
 export interface Conversation {
@@ -115,6 +116,12 @@ export interface FactoryOrder {
   specifications: Record<string, string>
   timeline: { start?: string; delivery?: string }
   createdAt: number
+}
+
+export interface ToolCall {
+  id: string
+  name: string
+  result?: string
 }
 
 export interface GenesusMetrics {

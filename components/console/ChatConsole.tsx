@@ -3,7 +3,8 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { useGenesusStore } from '@/stores/genesus-store'
 import { detectActiveAgents } from '@/lib/agents/genesus'
 import { modelLabel } from '@/lib/models'
-import type { Message, OrchestrationStep } from '@/types'
+import { PLUGINS } from '@/lib/plugins'
+import type { Message, OrchestrationStep, ToolCall } from '@/types'
 import { clsx } from 'clsx'
 
 function renderContent(text: string) {
@@ -16,6 +17,41 @@ function renderContent(text: string) {
     .replace(/^- (.+)$/gm, '<li>$1</li>')
     .replace(/(<li>[^]*?<\/li>)/g, '<ul>$1</ul>')
     .replace(/\n/g, '<br>')
+}
+
+const TOOL_ICONS: Record<string, string> = {
+  calculator: '🧮',
+  datetime: '🕐',
+  unit_converter: '📐',
+  text_analyzer: '📊',
+  web_search: '🌐',
+}
+
+function ToolCallChips({ toolCalls }: { toolCalls: ToolCall[] }) {
+  const [expanded, setExpanded] = useState<string | null>(null)
+  if (!toolCalls.length) return null
+  return (
+    <div className="flex flex-col gap-1 mb-2">
+      {toolCalls.map(tc => (
+        <div key={tc.id}>
+          <button
+            onClick={() => setExpanded(expanded === tc.id ? null : tc.id)}
+            className="flex items-center gap-1.5 text-[10px] font-mono px-2 py-1 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-[var(--muted)] hover:text-white transition-colors"
+          >
+            <span>{TOOL_ICONS[tc.name] || '🔧'}</span>
+            <span>{tc.name}</span>
+            {tc.result && <span className="text-[var(--acc4)]">✓</span>}
+            <span className="ml-1 opacity-50">{expanded === tc.id ? '▲' : '▼'}</span>
+          </button>
+          {expanded === tc.id && tc.result && (
+            <div className="mt-1 ml-2 px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-[10px] font-mono text-[var(--muted)] whitespace-pre-wrap max-h-32 overflow-y-auto">
+              {tc.result}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )
 }
 
 function OrchestrationPanel({ steps, isRunning }: { steps: OrchestrationStep[]; isRunning: boolean }) {
@@ -64,6 +100,9 @@ function MessageBubble({ msg }: { msg: Message }) {
 
   return (
     <div className={clsx('flex flex-col gap-1 max-w-[85%] animate-msg-in', isUser ? 'self-end items-end' : 'self-start items-start')}>
+      {!isUser && msg.toolCalls && msg.toolCalls.length > 0 && (
+        <ToolCallChips toolCalls={msg.toolCalls} />
+      )}
       <div className={clsx(
         'px-4 py-3 rounded-2xl text-sm leading-relaxed',
         isUser
@@ -104,6 +143,50 @@ function MessageBubble({ msg }: { msg: Message }) {
   )
 }
 
+function PluginsPanel({ onClose }: { onClose: () => void }) {
+  const { enabledPlugins, togglePlugin } = useGenesusStore()
+  return (
+    <div className="mx-4 mb-3 p-3 bg-[var(--surface2)] border border-[var(--accent)]/30 rounded-xl">
+      <div className="flex items-center justify-between mb-2">
+        <div className="text-[10px] font-mono text-[var(--muted)] uppercase tracking-widest">Plugins — Herramientas del Agente</div>
+        <button onClick={onClose} className="text-[var(--muted)] hover:text-white text-xs">✕</button>
+      </div>
+      <div className="grid grid-cols-2 gap-1.5">
+        {PLUGINS.map(plugin => {
+          const enabled = enabledPlugins.includes(plugin.id)
+          return (
+            <button
+              key={plugin.id}
+              onClick={() => togglePlugin(plugin.id)}
+              className={clsx(
+                'flex items-center gap-2 px-2.5 py-2 rounded-lg border text-left transition-all',
+                enabled
+                  ? 'border-[var(--accent)]/60 bg-[var(--accent)]/10 text-white'
+                  : 'border-[var(--border)] text-[var(--muted)] hover:border-[var(--accent)]/30 hover:text-white'
+              )}
+            >
+              <span className="text-base flex-shrink-0">{plugin.icon}</span>
+              <div className="min-w-0">
+                <div className="text-[11px] font-semibold truncate">{plugin.name}</div>
+                <div className="text-[9px] font-mono text-[var(--muted)] truncate">{plugin.description}</div>
+              </div>
+              <div className={clsx(
+                'ml-auto w-3 h-3 rounded-full flex-shrink-0 border transition-all',
+                enabled ? 'bg-[var(--acc4)] border-[var(--acc4)]' : 'bg-transparent border-[var(--muted)]'
+              )} />
+            </button>
+          )
+        })}
+      </div>
+      {enabledPlugins.length > 0 && (
+        <div className="mt-2 text-[9px] font-mono text-[var(--acc4)]">
+          {enabledPlugins.length} plugin{enabledPlugins.length > 1 ? 's' : ''} activo{enabledPlugins.length > 1 ? 's' : ''}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function ChatConsole() {
   const {
     conversations, activeConversationId, addConversation,
@@ -112,11 +195,13 @@ export default function ChatConsole() {
     orchestrationSteps, setOrchestrationSteps, updateOrchestrationStep,
     isOrchestrating, setIsOrchestrating,
     incrementMetric, addDynamicAgent,
+    enabledPlugins,
   } = useGenesusStore()
 
   const [input, setInput] = useState('')
   const [isThinking, setIsThinking] = useState(false)
   const [useOrchestration, setUseOrchestration] = useState(false)
+  const [showPlugins, setShowPlugins] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
@@ -171,7 +256,10 @@ export default function ChatConsole() {
   async function runChat(convId: string, text: string, agents: string[]) {
     setIsThinking(true)
     const msgId = crypto.randomUUID()
-    const assistantMsg: Message = { id: msgId, role: 'assistant', content: '', timestamp: Date.now(), isStreaming: true }
+    const assistantMsg: Message = {
+      id: msgId, role: 'assistant', content: '', timestamp: Date.now(),
+      isStreaming: true, toolCalls: [],
+    }
     addMessage(convId, assistantMsg)
 
     try {
@@ -181,7 +269,10 @@ export default function ChatConsole() {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: [...history, { role: 'user', content: text }], userName, dynamicAgents }),
+        body: JSON.stringify({
+          messages: [...history, { role: 'user', content: text }],
+          userName, dynamicAgents, enabledPlugins,
+        }),
       })
 
       if (!res.ok || !res.body) throw new Error('Error en la respuesta')
@@ -190,6 +281,7 @@ export default function ChatConsole() {
       const decoder = new TextDecoder()
       let fullText = ''
       let model
+      const toolCalls: ToolCall[] = []
 
       while (true) {
         const { done, value } = await reader.read()
@@ -200,13 +292,23 @@ export default function ChatConsole() {
           const raw = line.slice(6)
           if (raw === '[DONE]') break
           try {
-            const { text: t, model: m } = JSON.parse(raw)
-            if (t) { fullText += t; model = m }
-            updateMessage(convId, msgId, { content: fullText, model, isStreaming: true, agentsUsed: agents })
+            const data = JSON.parse(raw)
+            if (data.text) {
+              fullText += data.text
+              model = data.model
+            }
+            if (data.tool_call) {
+              toolCalls.push({ id: data.tool_call.id, name: data.tool_call.name })
+            }
+            if (data.tool_result) {
+              const tc = toolCalls.find(t => t.name === data.tool_result.name && !t.result)
+              if (tc) tc.result = data.tool_result.result
+            }
+            updateMessage(convId, msgId, { content: fullText, model, isStreaming: true, agentsUsed: agents, toolCalls: [...toolCalls] })
           } catch { /* skip */ }
         }
       }
-      updateMessage(convId, msgId, { isStreaming: false, agentsUsed: agents })
+      updateMessage(convId, msgId, { isStreaming: false, agentsUsed: agents, toolCalls: [...toolCalls] })
       incrementMetric('totalMessages')
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error desconocido'
@@ -317,10 +419,10 @@ export default function ChatConsole() {
             </div>
             <div className="grid grid-cols-2 gap-2 max-w-md w-full">
               {[
-                '¿Cómo optimizo mi operación de caña de azúcar?',
+                '¿Cuánto es 1500 hectáreas en acres?',
                 'Analiza el mercado de real estate en Venezuela',
                 'Crea un plan financiero para Cadet Holdings',
-                'Diseña una estrategia de expansión para AgroMercado',
+                '¿Qué fecha es en 90 días desde hoy?',
               ].map(s => (
                 <button
                   key={s}
@@ -349,9 +451,12 @@ export default function ChatConsole() {
       {/* Orchestration panel */}
       <OrchestrationPanel steps={orchestrationSteps} isRunning={isOrchestrating} />
 
+      {/* Plugins panel */}
+      {showPlugins && <PluginsPanel onClose={() => setShowPlugins(false)} />}
+
       {/* Input */}
       <div className="px-4 pb-4 pt-2 border-t border-[var(--border)] bg-[var(--surface)]/60">
-        {/* Mode toggle */}
+        {/* Mode toggle + plugin button */}
         <div className="flex items-center gap-2 mb-2">
           <button
             onClick={() => setUseOrchestration(false)}
@@ -364,6 +469,17 @@ export default function ChatConsole() {
             className={clsx('text-[10px] font-mono px-2.5 py-1 rounded-full border transition-all', useOrchestration ? 'border-[var(--gold)] text-[var(--gold)] bg-yellow-900/10' : 'border-[var(--border)] text-[var(--muted)]')}
           >
             🔱 Pipeline Opus→Sonnet→Haiku
+          </button>
+          <button
+            onClick={() => setShowPlugins(v => !v)}
+            className={clsx(
+              'ml-auto text-[10px] font-mono px-2.5 py-1 rounded-full border transition-all flex items-center gap-1',
+              showPlugins || enabledPlugins.length > 0
+                ? 'border-[var(--acc2)] text-[var(--acc2)] bg-[var(--acc2)]/10'
+                : 'border-[var(--border)] text-[var(--muted)]'
+            )}
+          >
+            🔌 Plugins{enabledPlugins.length > 0 && <span className="bg-[var(--acc2)] text-black rounded-full w-3.5 h-3.5 flex items-center justify-center font-bold">{enabledPlugins.length}</span>}
           </button>
         </div>
 

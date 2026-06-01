@@ -12,6 +12,7 @@ const NAV = [
   { href: '/factory', label: 'Fábrica', icon: '🏭', desc: 'Control industrial' },
   { href: '/suppliers', label: 'Proveedores', icon: '🔗', desc: 'Red de supply' },
   { href: '/clients', label: 'Clientes', icon: '👥', desc: 'Gestión CRM' },
+  { href: '/plugins', label: 'Plugins', icon: '🔌', desc: 'Herramientas IA' },
 ]
 
 export default function Sidebar() {

@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { Message, Conversation, GenesusMetrics, OrchestrationStep, Product, Supplier, Client, FactoryOrder } from '@/types'
+import type { PluginId } from '@/lib/plugins'
 
 interface GenesusStore {
   // User
@@ -49,6 +50,10 @@ interface GenesusStore {
   // Dynamic agents
   dynamicAgents: string[]
   addDynamicAgent: (name: string) => void
+
+  // Plugins
+  enabledPlugins: PluginId[]
+  togglePlugin: (id: PluginId) => void
 
   // UI
   sidebarOpen: boolean
@@ -140,6 +145,13 @@ export const useGenesusStore = create<GenesusStore>()(
         dynamicAgents: s.dynamicAgents.includes(name) ? s.dynamicAgents : [...s.dynamicAgents, name]
       })),
 
+      enabledPlugins: [],
+      togglePlugin: (id) => set(s => ({
+        enabledPlugins: s.enabledPlugins.includes(id)
+          ? s.enabledPlugins.filter(p => p !== id)
+          : [...s.enabledPlugins, id]
+      })),
+
       sidebarOpen: true,
       setSidebarOpen: (v) => set({ sidebarOpen: v }),
     }),
@@ -155,6 +167,7 @@ export const useGenesusStore = create<GenesusStore>()(
         clients: state.clients,
         orders: state.orders,
         dynamicAgents: state.dynamicAgents,
+        enabledPlugins: state.enabledPlugins,
       }),
     }
   )
